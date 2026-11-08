@@ -9,7 +9,6 @@
  *  - algumas pousam em elementos com `data-perch="fx,fy,ângulo;..."`
  *  - um toque numa área vazia solta 2–3 borboletas; arrastar deixa um rastro de brilhos
  *  - tocar numa borboleta "pega" ela (vira brilho e soma no contador); outra entra voando depois
- *  - chacoalhar o celular solta uma revoada (flock)
  */
 import { vibrate } from './haptics'
 import { sfx } from './sfx'
@@ -186,19 +185,6 @@ class ButterflyField {
       })
     }
     this.emitSparkles(x, y, 14, 140)
-  }
-
-  /** Revoada que entra pelas bordas (chacoalhar o celular). Ficam um tempo e dá para pegar. */
-  flock(n = 7) {
-    if (!this.running) return
-    for (let k = 0; k < n; k++) {
-      const fromLeft = k % 2 === 0
-      const y = rand(this.height * 0.2, this.height * 0.75)
-      const x = fromLeft ? -30 : this.width + 30
-      const a = fromLeft ? rand(-0.5, 0.3) : Math.PI + rand(-0.3, 0.5)
-      const sp = rand(160, 240)
-      this.add({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, vz: rand(0.5, 1.5), size: rand(30, 44), life: rand(9, 13), flapRate: 26 })
-    }
   }
 
   /** Tenta pegar a borboleta mais próxima do ponto. Retorna true se pegou. */

@@ -16,9 +16,6 @@ import { Footer } from '../components/sections/Footer'
 import { attachFieldInput, field } from '../lib/butterflyField'
 import { ProgressBar } from '../components/fun/ProgressBar'
 import { CatchCounter } from '../components/fun/CatchCounter'
-import { onShake, fakeShake } from '../lib/shake'
-import { vibrate } from '../lib/haptics'
-import { sfx } from '../lib/sfx'
 import { debug } from '../lib/debug'
 import { perf } from '../lib/perf'
 import { initScroll, gsap, ScrollTrigger } from '../lib/scroll'
@@ -60,15 +57,8 @@ export function App() {
     lenis.stop()
     attachFieldInput()
     appState.mounted()
-    // easter egg: chacoalhar o celular solta uma revoada
-    const off = onShake(() => {
-      field.flock(perf.isLite() ? 5 : 8)
-      vibrate([20, 40, 20, 40, 20])
-      sfx.sparkle()
-    })
     // ganchos para os testes automáticos (npm run testes)
-    if (import.meta.env.DEV || debug.teste) Object.assign(window, { __convite: { field, fakeShake } })
-    return off
+    if (import.meta.env.DEV || debug.teste) Object.assign(window, { __convite: { field } })
   }, [])
 
   useEffect(() => {

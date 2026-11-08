@@ -162,15 +162,33 @@ for (const modo of ['leve', '3d']) {
   await page.screenshot({ path: `${out}/borboletas-10-${modo}.png` })
 }
 
-// 5) chacoalhar solta uma revoada; toque em área vazia solta 2–3 borboletas
+// 5a) sem "chacoalhar": o toque de abertura liga só a inclinação da foto (deviceorientation), não o devicemotion
+{
+  // sensores liberados, como no Chrome do Android (lá a permissão já vem concedida)
+  const context = await browser.newContext({ ...ctxOpts, permissions: [...ctxOpts.permissions, 'accelerometer', 'gyroscope', 'magnetometer'] })
+  await context.addInitScript(() => {
+    window.__ouvintes = []
+    const add = window.addEventListener
+    window.addEventListener = function (type, ...rest) {
+      window.__ouvintes.push(type)
+      return add.call(this, type, ...rest)
+    }
+  })
+  const page = await context.newPage()
+  await page.goto(url)
+  await page.waitForTimeout(800)
+  await page.tap('#intro')
+  await page.waitForTimeout(1500)
+  const ouvintes = await page.evaluate(() => window.__ouvintes)
+  const txt = await page.locator('body').innerText()
+  check('sem chacoalhar: a inclinação continua e não há devicemotion', ouvintes.includes('deviceorientation') && !ouvintes.includes('devicemotion') && !/chacoalh/i.test(txt))
+  await context.close()
+}
+
+// 5b) toque em área vazia solta 2–3 borboletas
 {
   const page = await newPage('?abrir=1&teste=1&modo=leve')
   await page.waitForTimeout(2500)
-  const before = await page.evaluate(() => window.__convite.field.butterflies.length)
-  await page.evaluate(() => window.__convite.fakeShake())
-  await page.waitForTimeout(100)
-  const after = await page.evaluate(() => window.__convite.field.butterflies.length)
-  check('chacoalhar solta revoada', after - before >= 5, `${before} → ${after}`)
   // toque numa área vazia (fora de botões), longe das borboletas
   const n0 = await page.evaluate(() => window.__convite.field.butterflies.length)
   const spot = await page.evaluate(() => {

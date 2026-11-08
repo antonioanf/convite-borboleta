@@ -10,7 +10,6 @@ import { music } from '../lib/audio'
 import { requestTilt } from '../lib/tilt'
 import { debug } from '../lib/debug'
 import { loadApp } from '../lib/appLoader'
-import { requestShake } from '../lib/shake'
 import { sfx } from '../lib/sfx'
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -48,7 +47,6 @@ export function initIntro() {
     const ready = loadApp()
     // Tudo que precisa de "gesto do usuário" acontece aqui, de forma síncrona:
     requestTilt()
-    requestShake()
     music.start()
     sfx.sparkle()
     vibrate([14, 40, 10])

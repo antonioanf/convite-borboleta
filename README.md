@@ -6,7 +6,7 @@ Visual "iridescente tech": fundo perolado, gradientes holográficos, cartões em
 - Abertura com borboleta holográfica: as asas abrem e a tela se dissolve num brilho iridescente
 - Hero com a foto principal em "cartão holográfico", que inclina com o giroscópio ou o dedo
 - Borboletas 3D/2D que fogem do dedo, pousam na foto e **podem ser pegas** (meta: 10)
-- Raspadinha prateada na data, velinhas para apagar segurando o dedo (ou soprando), chacoalhar o celular solta uma revoada
+- Raspadinha prateada na data e velinhas para apagar segurando o dedo (ou soprando)
 - Contagem regressiva, local e agenda, galeria com lightbox, confirmação pelo WhatsApp e Pix
 
 **Lighthouse (mobile, build de produção, Lighthouse 13):** Performance 96 · Acessibilidade 100 · Boas práticas 100 · SEO 100.
@@ -118,7 +118,6 @@ npm run fotos     # gera public/fotos/<nome>.webp (até 1200 px) e <nome>-600.we
 | Foto holográfica | Inclina até 8° com o giroscópio (ou o dedo/mouse) | Parada com reduced-motion |
 | Raspadinha da data | Raspar ~60% completa sozinha, com brilho e confete. O cartão tem `touch-action: none`: raspar **não rola a página** | Já revelada com reduced-motion; a data está sempre no HTML; botão "Revelar" para teclado |
 | Velinhas | Segurar ~1,3 s (ou Espaço/Enter) apaga; opcional "usar microfone" para soprar | Se negar o microfone, segurar continua funcionando |
-| Chacoalhar | Revoada de borboletas (permissão de movimento pedida no toque de abertura no iOS) | Sem sensor: nada acontece |
 | Contagem | Números que viram, bolinha "ao vivo"; no dia vira "É hoje!" | — |
 | Confirmação | Botão vira check, borboletas + confete, abre o WhatsApp | Aviso se o WhatsApp não estiver configurado |
 
@@ -142,7 +141,7 @@ npm run shots -- --video                  # screenshots: iPhone 13, Pixel 5, 360
 npm run testes                            # 24 testes de interação
 ```
 
-`npm run testes` cobre: intro, raspadinha (inclusive que raspar com o dedo não rola a página), velinhas (toque curto não apaga, segurar apaga), pegar 10 borboletas nos modos leve e 3D, chacoalhar, toque que solta borboletas, lightbox, RSVP, Pix, `.ics` e os estados da contagem. Os resultados ficam em `screenshots/`.
+`npm run testes` cobre: intro, raspadinha (inclusive que raspar com o dedo não rola a página), velinhas (toque curto não apaga, segurar apaga), pegar 10 borboletas nos modos leve e 3D, toque que solta borboletas, lightbox, RSVP, Pix, `.ics` e os estados da contagem. Os resultados ficam em `screenshots/`.
 
 ## 10. Como funciona por dentro
 
@@ -152,10 +151,10 @@ src/main.ts                entrada pequena: intro + moldura no desktop
 src/config/convite.ts      ← TODO o conteúdo
 src/config/tema.ts         paleta → variáveis CSS (+ tons de texto com contraste AA)
 src/lib/
-  butterflyField.ts        simulação das borboletas (voo, fuga do dedo, pouso, captura, revoadas)
+  butterflyField.ts        simulação das borboletas (voo, fuga do dedo, pouso, captura)
   wingArt.ts               textura metalizada da asa (a mesma no 3D e no 2D)
   holo.ts                  ângulo do brilho holográfico (inclinação + scroll)
-  sfx.ts, shake.ts         efeitos sonoros e "chacoalhar"
+  sfx.ts                   efeitos sonoros
   celebrate.ts             confete + borboletas
   datas.ts, calendar.ts    datas formatadas, Google Agenda e .ics (dia inteiro se o horário não estiver definido)
 src/components/

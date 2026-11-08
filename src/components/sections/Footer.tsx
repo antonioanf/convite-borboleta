@@ -48,9 +48,6 @@ export function Footer() {
         <p className="label mt-3">
           {convite.crianca.nome} · {dataCurta}
         </p>
-        <p className="mt-5 rounded-full border border-dashed border-violeta/35 px-4 py-2 text-[13px] font-semibold text-tinta-2">
-          Psiu… chacoalhe o celular 📳
-        </p>
       </div>
     </footer>
   )
