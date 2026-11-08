@@ -123,9 +123,8 @@ function Viewer({ fotos, start, onClose }: { fotos: Foto[]; start: number; onClo
           <Icon name="fechar" size={22} />
         </button>
       </div>
-      <p className="pointer-events-none absolute inset-x-0 bottom-0 px-6 pb-[max(20px,env(safe-area-inset-bottom))] text-center text-[14px] leading-snug text-white/85">
-        {fotos[cur]?.alt}
-        <span className="mono mt-1 block text-[11px] uppercase tracking-[0.2em] text-white/75">puxe para baixo para fechar</span>
+      <p className="mono pointer-events-none absolute inset-x-0 bottom-0 px-6 pb-[max(20px,env(safe-area-inset-bottom))] text-center text-[11px] uppercase tracking-[0.2em] text-white/75">
+        puxe para baixo para fechar
       </p>
     </motion.div>
   )

@@ -194,6 +194,14 @@ for (const modo of ['leve', '3d']) {
   await page.waitForTimeout(700)
   await page.screenshot({ path: `${out}/lightbox.png` })
   check('lightbox abre', (await page.locator('[role=dialog]').count()) === 1)
+  {
+    // fotos sem legenda na tela: a descrição fica só no alt (leitores de tela)
+    const alts = convite.galeria.map((f) => f.alt)
+    const visivel = await page.locator('body').innerText()
+    const comAlt = await page.evaluate(() => [...document.querySelectorAll('img')].every((i) => i.alt.trim().length > 10))
+    const destaque = await page.locator('#tres').innerText()
+    check('fotos sem legenda visível (só alt)', alts.every((a) => !visivel.includes(a)) && !/ensaio/i.test(destaque) && comAlt)
+  }
   const box = await page.locator('[role=dialog] > div').nth(1).boundingBox()
   await page.mouse.move(box.x + box.width / 2, box.y + 300)
   await page.mouse.down()
