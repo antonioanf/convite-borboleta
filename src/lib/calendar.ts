@@ -5,8 +5,27 @@ function toUtcStamp(d: Date): string {
   return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
 }
 
+/** Data local da festa (no fuso do config) como "AAAAMMDD", mais o dia seguinte. */
+function localDays(c: ConviteConfig) {
+  const fmt = (d: Date) =>
+    new Intl.DateTimeFormat('en-CA', { timeZone: c.festa.fusoHorario, year: 'numeric', month: '2-digit', day: '2-digit' })
+      .format(d)
+      .replace(/-/g, '')
+  const start = new Date(c.festa.dataHora)
+  const day = fmt(start)
+  const next = new Date(Date.UTC(+day.slice(0, 4), +day.slice(4, 6) - 1, +day.slice(6, 8) + 1))
+  return { day, next: next.toISOString().slice(0, 10).replace(/-/g, '') }
+}
+
 export function eventTimes(c: ConviteConfig) {
   const start = new Date(c.festa.dataHora)
+  if (!c.festa.horarioDefinido) {
+    // horário a definir: a festa "acaba" no fim do dia (no fuso da festa)
+    const { next } = localDays(c)
+    const offset = c.festa.dataHora.match(/([+-]\d\d:\d\d|Z)$/)?.[1] ?? 'Z'
+    const end = new Date(`${next.slice(0, 4)}-${next.slice(4, 6)}-${next.slice(6, 8)}T00:00:00${offset}`)
+    return { start, end }
+  }
   const end = new Date(start.getTime() + c.festa.duracaoHoras * 3600_000)
   return { start, end }
 }
@@ -15,15 +34,22 @@ export function eventTitle(c: ConviteConfig) {
   return `Aniversário de ${c.crianca.nome} 🦋 ${c.crianca.idade} anos`
 }
 
+const where = (c: ConviteConfig) => [c.festa.local, c.festa.endereco].filter(Boolean).join(', ')
+const about = (c: ConviteConfig) =>
+  [c.crianca.frase, !c.festa.horarioDefinido && 'Horário a confirmar.', c.site.url && `Convite: ${c.site.url}`].filter(Boolean).join('\n\n')
+
 export function googleCalendarUrl(c: ConviteConfig): string {
   const { start, end } = eventTimes(c)
+  const { day, next } = localDays(c)
   const p = new URLSearchParams({
     action: 'TEMPLATE',
     text: eventTitle(c),
-    dates: `${toUtcStamp(start)}/${toUtcStamp(end)}`,
-    details: `${c.crianca.frase}\n\nConvite: ${c.site.url}`,
-    location: `${c.festa.local}, ${c.festa.endereco}`,
+    // sem horário definido: evento de dia inteiro
+    dates: c.festa.horarioDefinido ? `${toUtcStamp(start)}/${toUtcStamp(end)}` : `${day}/${next}`,
+    details: about(c),
+    location: where(c),
   })
+  if (c.festa.horarioDefinido) p.set('ctz', c.festa.fusoHorario)
   return `https://calendar.google.com/calendar/render?${p.toString()}`
 }
 
@@ -33,6 +59,10 @@ function icsEscape(s: string) {
 
 export function buildIcs(c: ConviteConfig): string {
   const { start, end } = eventTimes(c)
+  const { day, next } = localDays(c)
+  const when = c.festa.horarioDefinido
+    ? [`DTSTART:${toUtcStamp(start)}`, `DTEND:${toUtcStamp(end)}`]
+    : [`DTSTART;VALUE=DATE:${day}`, `DTEND;VALUE=DATE:${next}`]
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -40,13 +70,12 @@ export function buildIcs(c: ConviteConfig): string {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
-    `UID:${toUtcStamp(start)}-${c.crianca.nome.toLowerCase().replace(/\W/g, '')}@convite`,
+    `UID:${day}-${c.crianca.nome.toLowerCase().replace(/\W/g, '')}@convite`,
     `DTSTAMP:${toUtcStamp(new Date())}`,
-    `DTSTART:${toUtcStamp(start)}`,
-    `DTEND:${toUtcStamp(end)}`,
+    ...when,
     `SUMMARY:${icsEscape(eventTitle(c))}`,
-    `DESCRIPTION:${icsEscape(`${c.crianca.frase}\n\nConvite: ${c.site.url}`)}`,
-    `LOCATION:${icsEscape(`${c.festa.local}, ${c.festa.endereco}`)}`,
+    `DESCRIPTION:${icsEscape(about(c))}`,
+    ...(where(c) ? [`LOCATION:${icsEscape(where(c))}`] : []),
     'BEGIN:VALARM',
     'TRIGGER:-P1D',
     'ACTION:DISPLAY',

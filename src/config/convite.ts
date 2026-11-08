@@ -4,6 +4,8 @@
  *  Todo o conteúdo do convite vem deste arquivo.
  *  Para um novo cliente, edite só aqui e troque os arquivos
  *  em /public (fotos e música).
+ *
+ *  Procure por "TODO" para ver o que ainda falta preencher.
  * ============================================================
  */
 
@@ -14,56 +16,77 @@ export interface Foto {
   srcPequena?: string
   /** Descrição da foto (acessibilidade). */
   alt: string
+  /** Tamanho original em px (evita "pulos" no carregamento e define o formato no carrossel). */
+  largura?: number
+  altura?: number
+  /** Ponto de foco do recorte (CSS object-position), ex.: "50% 35%" = rosto um pouco acima do meio. */
+  foco?: string
 }
 
 export interface Paleta {
-  /** Fundo mais escuro (noite) */
-  noite: string
-  /** Fundo secundário */
-  ameixa: string
-  /** Cor principal */
-  violeta: string
-  /** Cor principal clara */
-  violetaClaro: string
-  /** Tons claros */
+  /** Fundo perolado (parede clara do estúdio) */
+  perola: string
+  /** Lavanda clara (balões claros) */
+  lavanda: string
+  /** Lilás (vestido / balões médios) */
   lilas: string
+  /** Violeta (balões mais fortes) */
+  violeta: string
+  /** Roxo profundo: cor do texto principal (no lugar do preto) */
+  roxo: string
+  /** Rosa (glacê do bolo) */
   rosa: string
-  /** Detalhes e brilhos */
-  dourado: string
+  /** Magenta: acento (borboleta rosa / "3" do bolo) */
+  magenta: string
+  /** Prata iridescente (balões metalizados) + os dois toques do gradiente holográfico */
+  prata: string
+  holoCiano: string
+  holoRosa: string
 }
 
 export interface ConviteConfig {
   crianca: {
     nome: string
     idade: number
-    /** Frase curta que aparece abaixo da idade */
+    /** Frase curta que aparece no convite */
     frase: string
   }
   festa: {
-    /** Data e hora no formato ISO com fuso, ex.: "2026-12-12T16:00:00-03:00" */
+    /** Data e hora no formato ISO com fuso, ex.: "2027-05-16T16:00:00-03:00" */
     dataHora: string
+    /**
+     * `false` enquanto o horário não estiver decidido: o convite mostra "horário a definir"
+     * e a agenda (.ics / Google) vira um evento de dia inteiro. A contagem usa o horário de `dataHora`.
+     */
+    horarioDefinido: boolean
     /** Duração aproximada (usada na agenda e para saber quando a festa acabou) */
     duracaoHoras: number
     /** Fuso usado para exibir data/hora (IANA) */
     fusoHorario: string
     local: string
+    /** Vazio = linha escondida */
     endereco: string
-    /** Link do Google Maps (botão "Como chegar") */
+    /** Link do Google Maps (botão "Como chegar"). Vazio = botão escondido */
     linkMapa: string
   }
   rsvp: {
-    /** WhatsApp dos pais: só dígitos, com DDI e DDD. Ex.: 5583999999999 */
+    /** WhatsApp dos pais: só dígitos, com DDI e DDD. Ex.: 5583999999999. Vazio = aviso no lugar do envio */
     whatsapp: string
-    /** Data limite para confirmar (ISO), ex.: "2026-12-05" */
+    /** Data limite para confirmar (ISO), ex.: "2027-05-01". Vazio = sem prazo */
     prazo: string
     /** Máximo de pessoas por confirmação */
     maxPessoas: number
   }
-  /** Assinatura no rodapé, ex.: "Com amor, papai e mamãe" */
+  /** Assinatura no rodapé, ex.: "Com amor, papai e mamãe". Vazio = linha escondida */
   assinatura: string
+  /** Foto principal (hero) */
   fotoPrincipal: Foto
+  /** Foto horizontal do cartão "3 aninhos" */
+  fotoDestaque: Foto
+  /** Foto vertical da seção das velinhas */
+  fotoBolo: Foto
   galeria: Foto[]
-  /** Caminho do mp3 em /public. `null` = sem música (o botão some). */
+  /** Caminho do mp3 em /public. `null` = sem música (o botão e os efeitos sonoros somem). */
   musica: string | null
   /** Pix para presentes. `null` = seção escondida. */
   pix: {
@@ -78,13 +101,14 @@ export interface ConviteConfig {
     contagem: boolean
     local: boolean
     galeria: boolean
+    velinhas: boolean
     rsvp: boolean
     pix: boolean
     compartilhar: boolean
   }
   /** Usado nas meta tags (prévia do link no WhatsApp) */
   site: {
-    /** Endereço final publicado, sem barra no final. Ex.: "https://convite-sofia.vercel.app" */
+    /** Endereço final publicado, sem barra no final. Ex.: "https://convite-anna-liz.vercel.app" */
     url: string
     titulo: string
     descricao: string
@@ -93,63 +117,100 @@ export interface ConviteConfig {
   }
 }
 
+const deitada: Foto = {
+  src: '/fotos/anna-deitada.webp',
+  srcPequena: '/fotos/anna-deitada-600.webp',
+  alt: 'Anna Liz deitada no chão, sorrindo com as mãos no rosto, de tiara de flores e vestido lilás, com balões lilás ao fundo',
+  largura: 890,
+  altura: 1600,
+  foco: '50% 34%',
+}
+const girando: Foto = {
+  src: '/fotos/anna-girando.webp',
+  srcPequena: '/fotos/anna-girando-600.webp',
+  alt: 'Anna Liz rodopiando com o vestido lilás, entre balões, borboletas metalizadas e um balão do número 3',
+  largura: 1200,
+  altura: 1048,
+  foco: '40% 50%',
+}
+const bolo: Foto = {
+  src: '/fotos/anna-bolo.webp',
+  srcPequena: '/fotos/anna-bolo-600.webp',
+  alt: 'Anna Liz de tiara olhando sorridente para o seu bolo cor-de-rosa com o número 3 e uma borboleta escrita Anna Liz',
+  largura: 888,
+  altura: 1600,
+  foco: '50% 78%',
+}
+const balao3: Foto = {
+  src: '/fotos/anna-balao3.webp',
+  srcPequena: '/fotos/anna-balao3-600.webp',
+  alt: 'Anna Liz deitada com a mão no rosto ao lado de um grande balão roxo do número 3 e flores de balão',
+  largura: 1195,
+  altura: 1062,
+  foco: '0% 50%',
+}
+
 export const convite: ConviteConfig = {
   crianca: {
-    nome: 'Sofia',
-    idade: 5,
-    frase: 'Venha voar comigo num jardim encantado de borboletas!',
+    nome: 'Anna Liz',
+    idade: 3,
+    frase: 'Vem voar comigo nos meus 3 aninhos!',
   },
   festa: {
-    dataHora: '2026-12-12T16:00:00-03:00',
+    // TODO: horário a definir. Troque o 16:00 pelo horário certo e mude `horarioDefinido` para true.
+    dataHora: '2027-05-16T16:00:00-03:00',
+    horarioDefinido: false,
     duracaoHoras: 4,
     fusoHorario: 'America/Fortaleza',
-    local: 'Espaço Jardim Encantado',
-    endereco: 'Rua Exemplo, 123 – Centro, Patos-PB',
-    linkMapa:
-      'https://www.google.com/maps/search/?api=1&query=Rua+Exemplo+123+Centro+Patos+PB',
+    local: 'Chácara São Pedro',
+    // TODO: endereço completo, ex.: 'Rua Tal, 123 – Bairro, Cidade-PB'
+    endereco: '',
+    // TODO: link do Google Maps (abra o local no Maps → Compartilhar → Copiar link)
+    linkMapa: '',
   },
   rsvp: {
-    whatsapp: '5583999999999',
-    prazo: '2026-12-05',
+    // TODO: WhatsApp de quem recebe as confirmações (só dígitos, com 55 + DDD), ex.: '5583999999999'
+    whatsapp: '',
+    // TODO: data limite para confirmar, ex.: '2027-05-01'
+    prazo: '',
     maxPessoas: 10,
   },
-  assinatura: 'Com amor, papai e mamãe',
-  fotoPrincipal: { alt: 'Sofia sorrindo no jardim' },
-  galeria: [
-    { alt: 'Sofia entre flores lilás' },
-    { alt: 'Sofia com asas de borboleta' },
-    { alt: 'Sofia rindo no balanço' },
-    { alt: 'Sofia soprando dente-de-leão' },
-    { alt: 'Sofia com coroa de flores' },
-  ],
+  // TODO: assinatura do rodapé, ex.: 'Com amor, papai e mamãe'
+  assinatura: '',
+  fotoPrincipal: deitada,
+  fotoDestaque: girando,
+  fotoBolo: bolo,
+  galeria: [deitada, girando, bolo, balao3],
   musica: '/musica/caixinha-de-musica.mp3',
-  pix: {
-    chave: 'sofia.presentes@email.com',
-    tipo: 'E-mail',
-    titular: 'Maria Exemplo',
-    mensagem: 'Sua presença é o nosso maior presente! Se quiser mimar a Sofia, deixamos o Pix aqui.',
-  },
+  // TODO: Pix para presentes. Para mostrar a seção, troque `null` por:
+  // { chave: 'sua-chave', tipo: 'Celular', titular: 'Nome do titular', mensagem: 'Sua presença é o nosso maior presente! 💜' }
+  pix: null,
   paleta: {
-    noite: '#1a0b2e',
-    ameixa: '#2d1250',
-    violeta: '#7c3aed',
-    violetaClaro: '#a855f7',
-    lilas: '#d8b4fe',
-    rosa: '#f0abfc',
-    dourado: '#f5d48a',
+    perola: '#F6F2FA',
+    lavanda: '#E4D4F7',
+    lilas: '#C3A3EE',
+    violeta: '#8B5CF6',
+    roxo: '#3B1C6E',
+    rosa: '#F48FB8',
+    magenta: '#E0428A',
+    prata: '#E9E6F2',
+    holoCiano: '#A5F3FC',
+    holoRosa: '#F9A8D4',
   },
   secoes: {
     contagem: true,
     local: true,
     galeria: true,
+    velinhas: true,
     rsvp: true,
     pix: true,
     compartilhar: true,
   },
   site: {
-    url: 'https://convite-sofia.vercel.app',
-    titulo: 'Sofia faz 5 aninhos! 🦋 Você é nosso convidado',
-    descricao: 'Sábado, 12 de dezembro, às 16h · Espaço Jardim Encantado. Toque para abrir o convite.',
+    // TODO: endereço publicado (sem barra no final). Sem ele, a imagem da prévia no WhatsApp não aparece.
+    url: '',
+    titulo: 'Anna Liz · 3 aninhos',
+    descricao: 'Domingo, 16 de maio de 2027 · Chácara São Pedro. Vem voar comigo nos meus 3 aninhos! 🦋',
     imagemOg: '/og.jpg',
   },
 }

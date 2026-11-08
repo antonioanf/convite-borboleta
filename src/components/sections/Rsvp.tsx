@@ -33,7 +33,7 @@ async function celebrate(origin: HTMLElement | null) {
   if (perf.reducedMotion) return
   const { default: confetti } = await import('canvas-confetti')
   const p = convite.paleta
-  const colors = [p.violeta, p.violetaClaro, p.lilas, p.rosa, p.dourado, '#ffffff']
+  const colors = [p.violeta, p.lilas, p.lilas, p.rosa, p.prata, '#ffffff']
   const o = { x: x / innerWidth, y: y / innerHeight }
   const base = { colors, disableForReducedMotion: true, zIndex: 95, scalar: 1.05 }
   confetti({ ...base, particleCount: perf.isLite() ? 60 : 120, spread: 80, startVelocity: 48, origin: o })

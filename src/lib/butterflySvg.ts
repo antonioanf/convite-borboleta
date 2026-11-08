@@ -13,13 +13,13 @@ let uid = 0
 export function butterflySvg(size = 40, variant = 0): string {
   const p = convite.paleta
   const id = `b${uid++}`
-  const a = variant % 3 === 0 ? p.violetaClaro : variant % 3 === 1 ? p.rosa : p.lilas
-  const b = variant % 3 === 0 ? p.rosa : variant % 3 === 1 ? p.violeta : p.violetaClaro
+  const a = variant % 3 === 0 ? p.lilas : variant % 3 === 1 ? p.rosa : p.lilas
+  const b = variant % 3 === 0 ? p.rosa : variant % 3 === 1 ? p.violeta : p.lilas
   const wing = `
-    <path d="${FOREWING}" fill="url(#${id}f)" stroke="${p.dourado}" stroke-width="1.2" stroke-opacity=".8"/>
-    <path d="${HINDWING}" fill="url(#${id}h)" stroke="${p.dourado}" stroke-width="1" stroke-opacity=".6"/>
+    <path d="${FOREWING}" fill="url(#${id}f)" stroke="${p.prata}" stroke-width="1.2" stroke-opacity=".8"/>
+    <path d="${HINDWING}" fill="url(#${id}h)" stroke="${p.prata}" stroke-width="1" stroke-opacity=".6"/>
     <circle cx="36" cy="-26" r="3.4" fill="#fff" fill-opacity=".85"/>
-    <circle cx="27" cy="-17" r="2" fill="${p.dourado}"/>
+    <circle cx="27" cy="-17" r="2" fill="${p.prata}"/>
     <circle cx="26" cy="22" r="3" fill="#fff" fill-opacity=".6"/>`
   return `<svg class="bfly" width="${size}" height="${size}" viewBox="-52 -48 104 96" aria-hidden="true">
     <defs>

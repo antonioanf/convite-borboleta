@@ -81,7 +81,7 @@ function useRigs() {
     // pivô no corpo: o canvas tem o corpo em (OX, OY)
     geo.translate((WING.W / 2 - WING.OX) / WING.S, (WING.OY - WING.H / 2) / WING.S, 0)
     const uniforms = { uTime: { value: 0 } }
-    const cA = new THREE.Color(p.violetaClaro)
+    const cA = new THREE.Color(p.lilas)
     const cB = new THREE.Color('#60a5fa') // toque de azul na iridescência
     const cC = new THREE.Color(p.rosa)
     const mats = [0, 1, 2].map((v) => {

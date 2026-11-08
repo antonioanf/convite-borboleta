@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { convite } from './src/config/convite.ts'
 import { buildIcs } from './src/lib/calendar.ts'
+import { temaCss } from './src/config/tema.ts'
 
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -15,16 +16,17 @@ const esc = (s: string) =>
  */
 function convitePlugin(): Plugin {
   const p = convite.paleta
-  const palette = `:root{--color-noite:${p.noite};--color-ameixa:${p.ameixa};--color-violeta:${p.violeta};--color-violeta-claro:${p.violetaClaro};--color-lilas:${p.lilas};--color-rosa:${p.rosa};--color-dourado:${p.dourado}}`
+  const palette = temaCss(p)
+  // TODO no config: sem site.url a imagem fica relativa e o WhatsApp não mostra a prévia
   const ogImage = /^https?:/.test(convite.site.imagemOg)
     ? convite.site.imagemOg
-    : convite.site.url + convite.site.imagemOg
+    : (convite.site.url || '') + convite.site.imagemOg
   const vars: Record<string, string> = {
     '%TITULO%': esc(convite.site.titulo),
     '%DESCRICAO%': esc(convite.site.descricao),
     '%URL%': esc(convite.site.url),
     '%OG_IMAGE%': esc(ogImage),
-    '%THEME%': p.noite,
+    '%THEME%': p.perola,
     '%NOME%': esc(convite.crianca.nome),
     '%PALETA%': palette,
   }

@@ -17,11 +17,11 @@ function variantColors(v: number) {
   const p = convite.paleta
   switch (v % 3) {
     case 0:
-      return { base: p.violeta, mid: p.violetaClaro, edge: p.rosa, spot: '#ffffff' }
+      return { base: p.violeta, mid: p.lilas, edge: p.rosa, spot: '#ffffff' }
     case 1:
-      return { base: p.violetaClaro, mid: p.rosa, edge: p.lilas, spot: p.dourado }
+      return { base: p.lilas, mid: p.rosa, edge: p.lilas, spot: p.prata }
     default:
-      return { base: p.violeta, mid: p.lilas, edge: p.rosa, spot: p.dourado }
+      return { base: p.violeta, mid: p.lilas, edge: p.rosa, spot: p.prata }
   }
 }
 
@@ -35,7 +35,7 @@ export function wingCanvas(variant: number): HTMLCanvasElement {
   c.height = H
   const g = c.getContext('2d')!
   const col = variantColors(key)
-  const gold = convite.paleta.dourado
+  const gold = convite.paleta.prata
   g.setTransform(S, 0, 0, S, OX, OY)
 
   const fore = new Path2D(FOREWING)

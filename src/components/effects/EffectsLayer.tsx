@@ -78,7 +78,7 @@ export function EffectsLayer() {
     const ctx = canvas.getContext('2d')!
     const reduced = perf.reducedMotion
     const p = convite.paleta
-    const sprites = [glowSprite(p.dourado), glowSprite(p.rosa), glowSprite(p.lilas), glowSprite('#ffffff')]
+    const sprites = [glowSprite(p.prata), glowSprite(p.rosa), glowSprite(p.lilas), glowSprite('#ffffff')]
     let dpr = 1
     let W = 0
     let H = 0
