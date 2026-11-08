@@ -1,13 +1,14 @@
 /**
  * Prepara a borboleta da tela de abertura a partir de originais/borboleta.png.
- * Uso: npm run borboleta
+ * Uso: npm run borboleta [-- largura qualidade]   (padrão: 400 px, qualidade 60)
  *
  *  1. Remove o fundo, se houver (preenche a partir das bordas a cor do fundo, com tolerância).
  *  2. Recorta no contorno da borboleta.
  *  3. Acha o eixo do corpo (o eixo de simetria vertical) e centraliza a imagem nele:
  *     assim a asa esquerda é exatamente a metade esquerda e a direita, a metade direita
  *     (o index.html separa as asas com clip-path em 50%).
- *  4. Grava src/intro/borboleta.webp (transparente, até 600 px de largura, nunca amplia).
+ *  4. Grava src/intro/borboleta.webp (transparente). Se o original for menor que a largura pedida,
+ *     amplia com lanczos e um leve realce de nitidez (a intro mostra a borboleta com 200 px; 400 px = tela 2x).
  *     O vite.config.ts embute esse arquivo no index.html (data URI) para a intro aparecer na hora.
  */
 import sharp from 'sharp'
@@ -17,6 +18,7 @@ import path from 'node:path'
 const root = path.resolve(import.meta.dirname, '..')
 const input = path.join(root, 'originais/borboleta.png')
 const output = path.join(root, 'src/intro/borboleta.webp')
+const [largura = 400, qualidade = 60] = process.argv.slice(2).map(Number)
 
 const { data, info } = await sharp(input).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
 const W = info.width
@@ -85,10 +87,11 @@ console.log(`eixo do corpo em x=${axis} (assimetria ${(best.err * 100).toFixed(1
 fs.mkdirSync(path.dirname(output), { recursive: true })
 await sharp(data, { raw: { width: W, height: H, channels: 4 } })
   .extract({ left, top, width, height })
-  .resize({ width: 600, withoutEnlargement: true })
-  .webp({ quality: 92, alphaQuality: 100, effort: 6 })
+  .resize({ width: largura, kernel: 'lanczos3' })
+  .sharpen({ sigma: 0.6 })
+  .webp({ quality: qualidade, alphaQuality: 40, smartSubsample: true, effort: 6 })
   .toFile(output)
 const m = await sharp(output).metadata()
 const kb = fs.statSync(output).size / 1024
 console.log(`${path.relative(root, output)}: ${m.width}x${m.height} · ${kb.toFixed(1)} KB${kb > 60 ? '  ⚠ acima de 60 KB' : ''}`)
-if (m.width < 500) console.log(`aviso: a imagem tem só ${m.width} px de largura; para ficar nítida em telas 3x, use um original com 600 px ou mais.`)
+if (width < largura) console.log(`aviso: o recorte do original tem só ${width} px; foi ampliado para ${m.width} px. Para ficar nítida em telas 3x, use um original com 600 px ou mais.`)
