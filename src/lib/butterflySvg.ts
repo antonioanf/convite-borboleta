@@ -1,4 +1,4 @@
-// Desenho vetorial da borboleta (usado nas revoadas DOM, no favicon e nos ícones).
+// Desenho vetorial da borboleta (usado nas revoadas DOM, nas texturas e nos ícones).
 // Corpo em x=0; viewBox -52 -48 104 96. A asa esquerda é o espelho da direita.
 import { convite } from '../config/convite'
 
@@ -9,27 +9,28 @@ export const HINDWING =
 
 let uid = 0
 
-/** Gera o SVG de uma borboleta (string) com cores da paleta e variação de matiz. */
+/** Gera o SVG de uma borboleta holográfica (string), com 3 variações de cor. */
 export function butterflySvg(size = 40, variant = 0): string {
   const p = convite.paleta
   const id = `b${uid++}`
-  const a = variant % 3 === 0 ? p.lilas : variant % 3 === 1 ? p.rosa : p.lilas
-  const b = variant % 3 === 0 ? p.rosa : variant % 3 === 1 ? p.violeta : p.lilas
+  const v = variant % 3
+  const base = v === 0 ? p.violeta : v === 1 ? p.roxo : p.magenta
+  const mid = v === 0 ? p.lilas : v === 1 ? p.violeta : p.rosa
   const wing = `
-    <path d="${FOREWING}" fill="url(#${id}f)" stroke="${p.prata}" stroke-width="1.2" stroke-opacity=".8"/>
-    <path d="${HINDWING}" fill="url(#${id}h)" stroke="${p.prata}" stroke-width="1" stroke-opacity=".6"/>
-    <circle cx="36" cy="-26" r="3.4" fill="#fff" fill-opacity=".85"/>
-    <circle cx="27" cy="-17" r="2" fill="${p.prata}"/>
-    <circle cx="26" cy="22" r="3" fill="#fff" fill-opacity=".6"/>`
+    <path d="${FOREWING}" fill="url(#${id}f)"/>
+    <path d="${HINDWING}" fill="url(#${id}h)"/>
+    <path d="${FOREWING} ${HINDWING}" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.2"/>
+    <circle cx="37" cy="-27" r="3.4" fill="#fff" fill-opacity=".9"/>
+    <circle cx="27" cy="25" r="2.6" fill="#fff" fill-opacity=".7"/>`
   return `<svg class="bfly" width="${size}" height="${size}" viewBox="-52 -48 104 96" aria-hidden="true">
     <defs>
-      <linearGradient id="${id}f" x1="0" y1="0" x2="1" y2="-1"><stop offset="0" stop-color="${b}"/><stop offset="1" stop-color="${a}"/></linearGradient>
-      <linearGradient id="${id}h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${b}"/><stop offset="1" stop-color="${p.lilas}"/></linearGradient>
+      <linearGradient id="${id}f" x1="0" y1="0" x2="1" y2="-1"><stop offset="0" stop-color="${base}"/><stop offset=".5" stop-color="${mid}"/><stop offset=".75" stop-color="${p.holoCiano}"/><stop offset="1" stop-color="${p.prata}"/></linearGradient>
+      <linearGradient id="${id}h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${base}"/><stop offset=".6" stop-color="${p.holoRosa}"/><stop offset="1" stop-color="${p.lavanda}"/></linearGradient>
     </defs>
     <g class="wr">${wing}</g>
     <g class="wl"><g transform="scale(-1,1)">${wing}</g></g>
-    <ellipse cx="0" cy="2" rx="2.6" ry="16" fill="#2a1145"/>
-    <path d="M-1,-13 Q-6,-26 -10,-30 M1,-13 Q6,-26 10,-30" stroke="#2a1145" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="0" cy="2" rx="2.6" ry="15" fill="${p.roxo}"/>
+    <path d="M-1,-12 Q-6,-25 -10,-29 M1,-12 Q6,-25 10,-29" stroke="${p.roxo}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
   </svg>`
 }
 

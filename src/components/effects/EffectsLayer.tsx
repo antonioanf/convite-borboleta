@@ -9,31 +9,31 @@ import { convite } from '../../config/convite'
 /** Estado compartilhado: quando a cena 3D está desenhando, o 2D não desenha borboletas. */
 export const renderState = { threeReady: false }
 
-interface Dust {
-  x: number
-  y: number
-  vy: number
-  r: number
-  tw: number
-  ph: number
-  c: number
-  depth: number
-}
-
-function glowSprite(color: string) {
+/** Brilho em forma de estrelinha de 4 pontas, com halo colorido (fica visível no fundo claro). */
+function starSprite(color: string) {
   const c = document.createElement('canvas')
-  c.width = c.height = 32
+  c.width = c.height = 48
   const g = c.getContext('2d')!
-  const rg = g.createRadialGradient(16, 16, 0, 16, 16, 16)
-  rg.addColorStop(0, '#ffffff')
-  rg.addColorStop(0.2, color)
-  rg.addColorStop(1, 'rgba(0,0,0,0)')
+  const rg = g.createRadialGradient(24, 24, 0, 24, 24, 24)
+  rg.addColorStop(0, color)
+  rg.addColorStop(0.35, color + '66')
+  rg.addColorStop(1, color + '00')
   g.fillStyle = rg
-  g.fillRect(0, 0, 32, 32)
+  g.fillRect(0, 0, 48, 48)
+  g.translate(24, 24)
+  g.fillStyle = '#ffffff'
+  g.beginPath()
+  for (let i = 0; i < 8; i++) {
+    const r = i % 2 === 0 ? 15 : 3
+    const a = (i / 8) * Math.PI * 2 - Math.PI / 2
+    g.lineTo(Math.cos(a) * r, Math.sin(a) * r)
+  }
+  g.closePath()
+  g.fill()
   return c
 }
 
-function drawButterfly(ctx: CanvasRenderingContext2D, b: Butterfly, ox: number, oy: number) {
+function drawButterfly(ctx: CanvasRenderingContext2D, b: Butterfly, ox: number, oy: number, body: string) {
   const img = wingCanvas(b.variant)
   const depth = 1 + b.z * 0.18
   const s = (b.size * depth) / WINGSPAN_UNITS
@@ -57,19 +57,18 @@ function drawButterfly(ctx: CanvasRenderingContext2D, b: Butterfly, ox: number, 
   ctx.scale(-f, 1)
   ctx.drawImage(img, ox0, oy0, w, h)
   ctx.restore()
-  ctx.fillStyle = '#2a1145'
+  ctx.fillStyle = body
   ctx.beginPath()
-  ctx.ellipse(0, 2, 2.8, 16, 0, 0, Math.PI * 2)
+  ctx.ellipse(0, 2, 2.6, 15, 0, 0, Math.PI * 2)
   ctx.fill()
   ctx.restore()
 }
 
 /**
  * Canvas 2D fixo por cima do conteúdo:
- *  - pó de fada dourado flutuando
- *  - rastro de brilhos do dedo
+ *  - brilhos (rastro do dedo, revoadas, capturas)
  *  - borboletas no modo leve (ou enquanto a cena 3D carrega)
- * Também é o "relógio" da simulação das borboletas e da inclinação.
+ * Também é o "relógio" da simulação das borboletas, da inclinação e do brilho holográfico.
  */
 export function EffectsLayer() {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -77,28 +76,13 @@ export function EffectsLayer() {
   useEffect(() => {
     const canvas = ref.current!
     const ctx = canvas.getContext('2d')!
-    const reduced = perf.reducedMotion
     const p = convite.paleta
-    const sprites = [glowSprite(p.prata), glowSprite(p.rosa), glowSprite(p.lilas), glowSprite('#ffffff')]
+    const sprites = [p.violeta, p.magenta, '#4fb3d1', p.lilas, p.holoRosa].map(starSprite)
     let dpr = 1
     let W = 0
     let H = 0
-    let dust: Dust[] = []
     const mesh = document.querySelector<HTMLElement>('.mesh')
 
-    const makeDust = () => {
-      const n = reduced ? 10 : perf.isLite() ? 16 : 34
-      dust = Array.from({ length: n }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vy: -(4 + Math.random() * 12),
-        r: 3 + Math.random() * 7,
-        tw: 0.6 + Math.random() * 2,
-        ph: Math.random() * 6.28,
-        c: Math.random() < 0.6 ? 0 : Math.random() < 0.5 ? 1 : 2,
-        depth: 0.3 + Math.random() * 0.9,
-      }))
-    }
     const resize = () => {
       dpr = Math.min(perf.isLite() ? 1 : 1.5, window.devicePixelRatio || 1)
       W = window.innerWidth
@@ -106,22 +90,18 @@ export function EffectsLayer() {
       canvas.width = Math.round(W * dpr)
       canvas.height = Math.round(H * dpr)
       field.resize(W, H)
-      if (!dust.length) makeDust()
     }
     resize()
     window.addEventListener('resize', resize, { passive: true })
-    const offLite = perf.subscribe(() => {
-      resize()
-      makeDust()
-    })
+    const offLite = perf.subscribe(resize)
 
     let last = performance.now()
     let raf = 0
+    let drewSomething = true
     const frame = (nowMs: number) => {
       raf = requestAnimationFrame(frame)
       const dt = Math.min(0.05, (nowMs - last) / 1000)
       last = nowMs
-      const t = nowMs / 1000
       updateTilt(dt)
       updateHolo()
       field.step(dt)
@@ -131,45 +111,31 @@ export function EffectsLayer() {
       const oy = tilt.y * 14
       if (mesh) mesh.style.transform = `translate3d(${-ox * 1.4}px, ${-oy * 1.4}px, 0)`
 
+      const draw2D = !renderState.threeReady && field.butterflies.length > 0
+      if (!draw2D && !field.sparkles.length) {
+        // nada para desenhar: limpa uma vez e descansa
+        if (drewSomething) {
+          ctx.setTransform(1, 0, 0, 1, 0, 0)
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          drewSomething = false
+        }
+        return
+      }
+      drewSomething = true
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, W, H)
-      ctx.globalCompositeOperation = 'lighter'
-
-      // pó de fada
-      for (const d of dust) {
-        if (!reduced) {
-          d.y += d.vy * dt * d.depth
-          d.x += Math.sin(t * 0.6 + d.ph) * 6 * dt
-          if (d.y < -20) {
-            d.y = H + 20
-            d.x = Math.random() * W
-          }
-        }
-        const a = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * d.tw + d.ph))
-        ctx.globalAlpha = a * 0.75 * d.depth
-        const r = d.r * d.depth
-        ctx.drawImage(sprites[d.c], d.x + ox * d.depth - r, d.y + oy * d.depth - r, r * 2, r * 2)
-      }
-
-      // rastro de brilhos
-      for (const s of field.sparkles) {
-        const k = 1 - s.life / s.max
-        ctx.globalAlpha = k
-        const r = s.size * (1.5 + 2.5 * k)
-        const spr = sprites[s.hue < 0.5 ? 0 : s.hue < 0.75 ? 1 : 3]
-        ctx.drawImage(spr, s.x - r, s.y - r, r * 2, r * 2)
-      }
 
       // borboletas 2D
-      ctx.globalCompositeOperation = 'source-over'
-      if (!renderState.threeReady) {
-        for (const b of field.butterflies) {
-          ctx.globalAlpha = 0.28
-          const gr = b.size * 0.9
-          ctx.drawImage(sprites[2], b.x - gr, b.y - gr, gr * 2, gr * 2)
-          ctx.globalAlpha = 1
-          drawButterfly(ctx, b, ox, oy)
-        }
+      if (draw2D) {
+        for (const b of field.butterflies) drawButterfly(ctx, b, ox, oy, p.roxo)
+      }
+
+      // brilhos
+      for (const s of field.sparkles) {
+        const k = 1 - s.life / s.max
+        ctx.globalAlpha = Math.min(1, k * 1.4)
+        const r = s.size * (2.2 + 2.2 * k)
+        ctx.drawImage(sprites[Math.floor(s.hue * sprites.length) % sprites.length], s.x - r, s.y - r, r * 2, r * 2)
       }
       ctx.globalAlpha = 1
     }

@@ -83,12 +83,14 @@ class ButterflyField {
   running = false
   ambientCount = 8
   maxSpawned = 6
+  maxSparkles = 120
   slow = false
   private slots: PerchSlot[] = []
   private nextPerchScan = 0
 
-  configure(opts: { ambient: number; slow?: boolean }) {
+  configure(opts: { ambient: number; slow?: boolean; lite?: boolean }) {
     this.ambientCount = opts.ambient
+    this.maxSparkles = opts.lite ? 60 : 120
     this.slow = !!opts.slow
     // ajusta a população se o modo mudar (ex.: caiu para o modo leve)
     const ambient = this.butterflies.filter((b) => !isFinite(b.life) || b.life > 1e8)
@@ -111,7 +113,7 @@ class ButterflyField {
         vy: Math.sin(a) * sp,
         vz: rand(0.5, 2),
         z: rand(-0.6, 0.8),
-        size: rand(34, 48),
+        size: rand(40, 54),
         lander: i < 3,
         life: Infinity,
       })
@@ -199,7 +201,8 @@ class ButterflyField {
         hue: Math.random(),
       })
     }
-    if (this.sparkles.length > 220) this.sparkles.splice(0, this.sparkles.length - 220)
+    // limite de partículas ao mesmo tempo (menos no modo leve)
+    if (this.sparkles.length > this.maxSparkles) this.sparkles.splice(0, this.sparkles.length - this.maxSparkles)
   }
 
   resize(w: number, h: number) {

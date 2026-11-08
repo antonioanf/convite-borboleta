@@ -9,7 +9,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { PerformanceMonitor } from '@react-three/drei'
 import * as THREE from 'three'
 import { field } from '../../lib/butterflyField'
-import { WING, WINGSPAN_UNITS, wingCanvas } from '../../lib/wingArt'
+import { VARIANTS, WING, WINGSPAN_UNITS, wingCanvas } from '../../lib/wingArt'
 import { tilt } from '../../lib/tilt'
 import { perf } from '../../lib/perf'
 import { convite } from '../../config/convite'
@@ -58,9 +58,10 @@ const fragment = /* glsl */ `
     // a cor iridescente desliza conforme o ângulo da asa em relação à câmera
     float k = (1.0 - facing) * 1.4 + vUv.x * 0.35 + vW.x * 0.06 + uTime * 0.04;
     vec3 ir = irid(k);
-    vec3 col = mix(t.rgb, t.rgb * ir * 1.9, 0.42);
-    col += ir * pow(1.0 - facing, 2.0) * 0.55;
-    col += vec3(1.0, 0.92, 0.75) * pow(facing, 12.0) * 0.12;
+    // metal holográfico: quanto mais de lado a asa, mais a cor desliza para ciano/rosa/lavanda
+    float edge = pow(1.0 - facing, 1.4);
+    vec3 col = mix(t.rgb, t.rgb * 0.7 + ir * 0.45, 0.12 + edge * 0.45);
+    col += vec3(1.0) * pow(facing, 18.0) * 0.14;
     gl_FragColor = vec4(col, 1.0);
     #include <colorspace_fragment>
   }
@@ -81,13 +82,13 @@ function useRigs() {
     // pivô no corpo: o canvas tem o corpo em (OX, OY)
     geo.translate((WING.W / 2 - WING.OX) / WING.S, (WING.OY - WING.H / 2) / WING.S, 0)
     const uniforms = { uTime: { value: 0 } }
-    const cA = new THREE.Color(p.lilas)
-    const cB = new THREE.Color('#60a5fa') // toque de azul na iridescência
-    const cC = new THREE.Color(p.rosa)
-    const mats = [0, 1, 2].map((v) => {
+    const cA = new THREE.Color(p.holoCiano)
+    const cB = new THREE.Color(p.holoRosa)
+    const cC = new THREE.Color(p.lavanda)
+    const mats = Array.from({ length: VARIANTS }, (_, v) => {
       const tex = new THREE.CanvasTexture(wingCanvas(v))
       tex.colorSpace = THREE.SRGBColorSpace
-      tex.anisotropy = 2
+      tex.anisotropy = 4
       return new THREE.ShaderMaterial({
         vertexShader: vertex,
         fragmentShader: fragment,
@@ -96,7 +97,7 @@ function useRigs() {
       })
     })
     const bodyGeo = new THREE.CapsuleGeometry(2.4, 26, 4, 8)
-    const bodyMat = new THREE.MeshBasicMaterial({ color: '#2a1145' })
+    const bodyMat = new THREE.MeshBasicMaterial({ color: p.roxo })
     const group = new THREE.Group()
     const rigs: Rig[] = []
     for (let i = 0; i < POOL; i++) {
@@ -106,8 +107,8 @@ function useRigs() {
       body.position.y = -1
       const wingR = new THREE.Group()
       const wingL = new THREE.Group()
-      const meshR = new THREE.Mesh(geo, mats[i % 3])
-      const meshL = new THREE.Mesh(geo, mats[i % 3])
+      const meshR = new THREE.Mesh(geo, mats[i % VARIANTS])
+      const meshL = new THREE.Mesh(geo, mats[i % VARIANTS])
       meshL.scale.x = -1
       wingR.add(meshR)
       wingL.add(meshL)
@@ -164,7 +165,7 @@ function Swarm() {
         continue
       }
       r.root.visible = true
-      const mat = mats[b.variant % 3]
+      const mat = mats[b.variant % VARIANTS]
       if (r.meshR.material !== mat) {
         r.meshR.material = mat
         r.meshL.material = mat

@@ -28,7 +28,7 @@ export function App() {
 
   useEffect(() => {
     document.documentElement.classList.toggle('lite', lite)
-    field.configure({ ambient: perf.reducedMotion ? 3 : lite ? 5 : 8, slow: perf.reducedMotion })
+    field.configure({ ambient: perf.reducedMotion ? 3 : lite ? 4 : 6, slow: perf.reducedMotion, lite })
   }, [lite])
 
   useEffect(() => {
