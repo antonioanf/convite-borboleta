@@ -764,26 +764,6 @@
   .field[aria-invalid='true'] {
     border-color: var(--color-magenta);
   }
-  .step {
-    display: grid;
-    place-items: center;
-    flex: none;
-    width: 56px;
-    height: 56px;
-    border-radius: 18px;
-    font-size: 26px;
-    color: var(--color-violeta-txt);
-    background: linear-gradient(145deg, #fff, var(--color-lavanda));
-    border: 1px solid color-mix(in srgb, var(--color-violeta) 18%, transparent);
-    transition: transform 0.25s var(--ease-mola);
-  }
-  .step:active {
-    transform: scale(0.9);
-  }
-  .step:disabled {
-    opacity: 0.4;
-  }
-
   /* ---------- Barra inferior: pill flutuante clara ---------- */
   .dock {
     display: flex;

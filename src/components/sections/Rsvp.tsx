@@ -17,8 +17,8 @@ const prazoTxt = prazo
   ? new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', timeZone: convite.festa.fusoHorario }).format(prazo)
   : ''
 
-function waUrl(nome: string, pessoas: number, recado: string) {
-  const linhas = [`Olá! 🦋 Confirmo presença no aniversário de ${convite.crianca.nome}!`, '', `Nome: ${nome}`, `Pessoas: ${pessoas}`]
+function waUrl(nome: string, recado: string) {
+  const linhas = [`Olá! 🦋 Confirmo presença no aniversário de ${convite.crianca.nome}!`, '', `Nome: ${nome}`]
   if (recado.trim()) linhas.push(`Recado: ${recado.trim()}`)
   return `https://wa.me/${r.whatsapp}?text=${encodeURIComponent(linhas.join('\n'))}`
 }
@@ -44,7 +44,6 @@ function Check() {
 export function Rsvp() {
   const id = useId()
   const [nome, setNome] = useState('')
-  const [pessoas, setPessoas] = useState(1)
   const [recado, setRecado] = useState('')
   const [erro, setErro] = useState<string | null>(null)
   const [shake, setShake] = useState(0)
@@ -55,8 +54,6 @@ export function Rsvp() {
   const timer = useRef(0)
   const passouPrazo = !!prazo && now() > prazo.getTime()
   const semWhats = !r.whatsapp
-
-  const setQtd = (n: number) => setPessoas(Math.max(1, Math.min(r.maxPessoas, n || 1)))
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -71,7 +68,7 @@ export function Rsvp() {
     }
     setErro(null)
     vibrate([20, 40, 20, 40, 60])
-    const link = semWhats ? null : waUrl(n, pessoas, recado)
+    const link = semWhats ? null : waUrl(n, recado)
     setUrl(link)
     // 1) o botão vira um check  2) a tela solta borboletas + confete  3) abre o WhatsApp
     setStage('check')
@@ -140,49 +137,6 @@ export function Rsvp() {
                   )}
                 </AnimatePresence>
               </motion.div>
-
-              <div>
-                <label htmlFor={`${id}-qtd`} className="label mb-2 block">
-                  Quantas pessoas (com você)
-                </label>
-                <div className="flex items-center gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      vibrate(8)
-                      setQtd(pessoas - 1)
-                    }}
-                    disabled={pessoas <= 1}
-                    aria-label="Diminuir"
-                    className="step"
-                  >
-                    −
-                  </button>
-                  <input
-                    id={`${id}-qtd`}
-                    name="pessoas"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    enterKeyHint="next"
-                    value={pessoas}
-                    onChange={(e) => setQtd(parseInt(e.target.value.replace(/\D/g, ''), 10))}
-                    className="field mono min-w-0 text-center !text-[22px] font-semibold"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      vibrate(8)
-                      setQtd(pessoas + 1)
-                    }}
-                    disabled={pessoas >= r.maxPessoas}
-                    aria-label="Aumentar"
-                    className="step"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
 
               <div>
                 <label htmlFor={`${id}-recado`} className="label mb-2 flex justify-between gap-2">

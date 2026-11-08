@@ -74,8 +74,6 @@ export interface ConviteConfig {
     whatsapp: string
     /** Data limite para confirmar (ISO), ex.: "2027-05-01". Vazio = sem prazo */
     prazo: string
-    /** Máximo de pessoas por confirmação */
-    maxPessoas: number
   }
   /** Assinatura no rodapé, ex.: "Com amor, papai e mamãe". Vazio = linha escondida */
   assinatura: string
@@ -172,7 +170,6 @@ export const convite: ConviteConfig = {
     whatsapp: '',
     // TODO: data limite para confirmar, ex.: '2027-05-01'
     prazo: '',
-    maxPessoas: 10,
   },
   // TODO: assinatura do rodapé, ex.: 'Com amor, papai e mamãe'
   assinatura: '',

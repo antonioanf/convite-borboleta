@@ -209,8 +209,7 @@ for (const modo of ['leve', '3d']) {
   await page.screenshot({ path: `${out}/rsvp-erro.png` })
   check('RSVP pede o nome', /nome/i.test((await page.locator('#confirmar [role=alert]').textContent()) ?? ''))
   await page.fill('#confirmar input[name=nome]', 'Ana e família')
-  await page.tap('#confirmar button[aria-label=Aumentar]')
-  await page.tap('#confirmar button[aria-label=Aumentar]')
+  check('RSVP sem campo de quantas pessoas', (await page.locator('#confirmar input[name=pessoas], #confirmar button[aria-label=Aumentar]').count()) === 0)
   await page.fill('#confirmar textarea', `Parabéns, ${convite.crianca.nome}! 💜`)
   let whats = ''
   await page.route('https://wa.me/**', (r) => {
@@ -219,9 +218,9 @@ for (const modo of ['leve', '3d']) {
   })
   await page.tap('#confirmar button[type=submit]')
   await page.waitForTimeout(500)
-  await page.screenshot({ path: `${out}/rsvp-check.png` })
+  await page.screenshot({ path: `${out}/rsvp-check.png`, timeout: 5000 }).catch(() => {}) // com WhatsApp, a página navega logo depois
   await page.waitForTimeout(1600)
-  if (convite.rsvp.whatsapp) check('RSVP abre o WhatsApp com a mensagem', /Pessoas: 3/.test(whats), whats.slice(0, 60))
+  if (convite.rsvp.whatsapp) check('RSVP abre o WhatsApp com a mensagem', /Nome: Ana e família/.test(whats) && !/Pessoas/.test(whats), whats.slice(0, 60))
   else check('RSVP sem WhatsApp mostra aviso', /não foi configurado/.test(await page.locator('#confirmar').innerText()))
 
   if (convite.pix && convite.secoes.pix) {
@@ -244,6 +243,8 @@ for (const modo of ['leve', '3d']) {
   const t1 = t0 + convite.festa.duracaoHoras * 3600_000
   if (convite.festa.horarioDefinido) {
     check('.ics no horário da festa, com a duração do config', start === `DTSTART:${utc(t0)}` && end === `DTEND:${utc(t1)}`, `${start} ${end}`)
+    await page.goto(url + '?abrir=1') // depois do RSVP a página pode ter ido para o WhatsApp
+    await page.waitForTimeout(1200)
     await scrollTo(page, 'local')
     await page.locator('#local button[aria-expanded]').click()
     await page.waitForTimeout(600)
