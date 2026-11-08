@@ -14,6 +14,14 @@ const esc = (s: string) =>
  *  - injeta a paleta como variáveis CSS (sem "piscar" a cor padrão);
  *  - gera /convite.ics (arquivo de agenda) no dev e no build.
  */
+/** "16 · 05 · 2027" no fuso da festa */
+function dataCurta() {
+  return new Intl.DateTimeFormat('pt-BR', { timeZone: convite.festa.fusoHorario, day: '2-digit', month: '2-digit', year: 'numeric' })
+    .format(new Date(convite.festa.dataHora))
+    .split('/')
+    .join(' · ')
+}
+
 function convitePlugin(): Plugin {
   const p = convite.paleta
   const palette = temaCss(p)
@@ -28,6 +36,8 @@ function convitePlugin(): Plugin {
     '%OG_IMAGE%': esc(ogImage),
     '%THEME%': p.perola,
     '%NOME%': esc(convite.crianca.nome),
+    '%IDADE%': String(convite.crianca.idade),
+    '%DATA_CURTA%': dataCurta(),
     '%PALETA%': palette,
   }
   return {

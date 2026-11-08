@@ -1,6 +1,7 @@
 /**
- * Intro do casulo. O HTML/CSS já vem no index.html (aparece na hora);
- * aqui só ligamos o toque e a sequência de abertura.
+ * Intro: borboleta holográfica + "Toque para abrir".
+ * O HTML/CSS já vem no index.html (aparece na hora); aqui só ligamos o toque
+ * e a sequência de abertura: asas batem → abrem → brilho iridescente dissolve a tela.
  */
 import { appState } from '../lib/appState'
 import { butterflyBurst, prefersReducedMotion } from '../lib/butterflySvg'
@@ -41,7 +42,7 @@ export function initIntro() {
     // Tudo que precisa de "gesto do usuário" acontece aqui, de forma síncrona:
     requestTilt()
     music.start()
-    vibrate([18, 40, 12])
+    vibrate([14, 40, 10])
 
     const reduced = prefersReducedMotion()
     el.classList.add('is-opening')
@@ -55,24 +56,17 @@ export function initIntro() {
       el.remove()
       return
     }
-    await wait(420)
-    el.classList.add('is-cracked')
+    await wait(560) // asas batendo rápido
+    await ready // em celular lento, a borboleta continua batendo as asas até o app estar pronto
+    el.classList.add('is-open')
     vibrate(10)
-    await wait(330)
-    await ready // em celular lento, o casulo fica brilhando rachado até o app estar pronto
-    el.classList.add('is-split')
-    const cocoon = el.querySelector('.cocoon-wrap')!.getBoundingClientRect()
-    butterflyBurst({
-      x: cocoon.left + cocoon.width / 2,
-      y: cocoon.top + cocoon.height / 2,
-      count: 16,
-      towardCamera: true,
-    })
-    await wait(260)
+    const bf = el.querySelector('.bf-wrap')!.getBoundingClientRect()
+    butterflyBurst({ x: bf.left + bf.width / 2, y: bf.top + bf.height / 2, count: 10, towardCamera: true })
+    await wait(380)
     unlock()
     appState.open()
     el.classList.add('is-gone')
-    await wait(900)
+    await wait(950)
     el.remove()
   }
 

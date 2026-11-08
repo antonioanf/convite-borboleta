@@ -11,7 +11,7 @@ import { now } from '../../lib/debug'
 import { perf } from '../../lib/perf'
 
 const r = convite.rsvp
-const prazo = new Date(`${r.prazo}T23:59:59-03:00`)
+const prazo = new Date(`${r.prazo || "2099-01-01"}T23:59:59-03:00`)
 const prazoTxt = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', timeZone: convite.festa.fusoHorario }).format(prazo)
 
 function waUrl(nome: string, pessoas: number, recado: string) {
