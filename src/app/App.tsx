@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, memo, Suspense, useEffect, useState } from 'react'
 import { convite } from '../config/convite'
 import { useLite, useOpened } from '../hooks/useStores'
 import { Mesh } from '../components/effects/Mesh'
@@ -22,15 +22,33 @@ import { sfx } from '../lib/sfx'
 import { debug } from '../lib/debug'
 import { perf } from '../lib/perf'
 import { initScroll, gsap, ScrollTrigger } from '../lib/scroll'
+import { appState } from '../lib/appState'
 
 // Cena 3D: chunk separado, só baixado depois da intro e se o aparelho aguentar.
 const Butterflies3D = lazy(() => import('../components/effects/Butterflies3D'))
+
+/** As seções não dependem de "aberto": ficam memorizadas para a abertura não redesenhar o convite inteiro. */
+const Sections = memo(function Sections() {
+  const s = convite.secoes
+  return (
+    <>
+      <Hero />
+      <Destaque />
+      {s.contagem && <Countdown />}
+      {s.local && <Details />}
+      {s.galeria && <Gallery />}
+      {s.velinhas && <Velinhas />}
+      {s.rsvp && <Rsvp />}
+      {s.pix && convite.pix && <Pix />}
+      <Footer />
+    </>
+  )
+})
 
 export function App() {
   const opened = useOpened()
   const lite = useLite()
   const [want3D, setWant3D] = useState(false)
-  const s = convite.secoes
 
   useEffect(() => {
     document.documentElement.classList.toggle('lite', lite)
@@ -41,6 +59,7 @@ export function App() {
     const lenis = initScroll()
     lenis.stop()
     attachFieldInput()
+    appState.mounted()
     // easter egg: chacoalhar o celular solta uma revoada
     const off = onShake(() => {
       field.flock(perf.isLite() ? 5 : 8)
@@ -104,15 +123,7 @@ export function App() {
       <Mesh />
       <ProgressBar />
       <main className="page" aria-hidden={!opened}>
-        <Hero />
-        <Destaque />
-        {s.contagem && <Countdown />}
-        {s.local && <Details />}
-        {s.galeria && <Gallery />}
-        {s.velinhas && <Velinhas />}
-        {s.rsvp && <Rsvp />}
-        {s.pix && convite.pix && <Pix />}
-        <Footer />
+        <Sections />
       </main>
       <EffectsLayer />
       {want3D && !lite && (

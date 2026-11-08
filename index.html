@@ -52,8 +52,7 @@
 
       .intro { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
         min-height: 100svh; height: 100dvh; padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom); box-sizing: border-box;
-        background: var(--color-perola); overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; touch-action: manipulation;
-        transition: opacity .9s ease; }
+        background: var(--color-perola); overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
       .intro:focus-visible { outline: none; }
       .intro:focus-visible .intro-cta span { outline: 3px solid var(--color-violeta); outline-offset: 5px; }
       /* gradiente iridescente lento (só transform) */
@@ -102,16 +101,15 @@
         -webkit-mask: radial-gradient(closest-side, #000 55%, transparent); mask: radial-gradient(closest-side, #000 55%, transparent);
         transform: scale(0); opacity: 0; will-change: transform, opacity; }
 
-      .intro.is-opening { cursor: default; }
-      .intro.is-opening .bf .wl, .intro.is-opening .bf .wr { animation: flapfast .16s ease-in-out 4 alternate; }
-      @keyframes flapfast { from { transform: scaleX(1) } to { transform: scaleX(.2) } }
-      .intro.is-open .bf .wl, .intro.is-open .bf .wr { animation: none; transform: scaleX(1.14); transition: transform .5s cubic-bezier(.3,.7,.4,1.5); }
-      .intro.is-open .bf { animation: none; transform: scale(1.5); opacity: 0; transition: transform .9s cubic-bezier(.2,.8,.2,1), opacity .7s .25s ease; }
-      .intro.is-open .bf-halo { animation: none; transform: scale(1.6); opacity: 0; transition: transform .8s, opacity .8s; }
-      .intro.is-open .intro-top, .intro.is-open .intro-cta, .intro.is-open .intro-date { opacity: 0; transform: translateY(14px); transition: opacity .35s, transform .35s; }
-      .intro.is-open .intro-glow { animation: glow 1.1s cubic-bezier(.2,.7,.2,1) forwards; }
-      @keyframes glow { 0% { transform: scale(0); opacity: 1 } 70% { opacity: 1 } 100% { transform: scale(13); opacity: 0 } }
-      .intro.is-gone { opacity: 0; pointer-events: none; }
+      /* saída (~0,55 s depois do toque): asas abrem, borboleta voa para a câmera, brilho dissolve a tela */
+      .intro.is-open { cursor: default; }
+      .intro.is-open .bf .wl, .intro.is-open .bf .wr { animation: none; transform: scaleX(1.14); transition: transform .3s cubic-bezier(.3,.7,.4,1.5); }
+      .intro.is-open .bf { animation: none; transform: scale(1.5); opacity: 0; transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .35s .15s ease; }
+      .intro.is-open .bf-halo { animation: none; transform: scale(1.6); opacity: 0; transition: transform .5s, opacity .5s; }
+      .intro.is-open .intro-top, .intro.is-open .intro-cta, .intro.is-open .intro-date { opacity: 0; transform: translateY(14px); transition: opacity .25s, transform .25s; }
+      .intro.is-open .intro-glow { animation: glow .55s cubic-bezier(.2,.7,.2,1) forwards; }
+      @keyframes glow { 0% { transform: scale(0); opacity: 1 } 60% { opacity: 1 } 100% { transform: scale(13); opacity: 0 } }
+      .intro.is-gone { opacity: 0; pointer-events: none; transition: opacity .4s .12s ease; }
 
       /* Borboleta SVG reutilizável (revoadas) */
       .bfly { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; will-change: transform, opacity; }
@@ -120,6 +118,7 @@
 
       @media (prefers-reduced-motion: reduce) {
         .intro *, .intro { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+        .intro * { transition-duration: .01ms !important; }
       }
     </style>
   </head>

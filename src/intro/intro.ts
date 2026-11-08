@@ -1,7 +1,7 @@
 /**
  * Intro: borboleta holográfica + "Toque para abrir".
  * O HTML/CSS já vem no index.html (aparece na hora); aqui só ligamos o toque
- * e a sequência de abertura: asas batem → abrem → brilho iridescente dissolve a tela.
+ * e a abertura (~0,6 s): as asas abrem e o brilho iridescente dissolve a tela.
  */
 import { appState } from '../lib/appState'
 import { butterflyBurst, prefersReducedMotion } from '../lib/butterflySvg'
@@ -32,45 +32,41 @@ export function initIntro() {
     appState.open()
     return
   }
-  // começa a preparar o app assim que o dedo encosta (antes do clique)
-  el.addEventListener('pointerdown', () => loadApp(), { once: true, passive: true })
+  // O app é montado ATRÁS da intro assim que o celular fica livre (depois do load),
+  // em pedacinhos (startTransition no mount). No toque ele normalmente já está pronto.
+  const preload = () => void loadApp()
+  el.addEventListener('pointerdown', preload, { once: true, passive: true })
+  const idle = () => ('requestIdleCallback' in window ? requestIdleCallback(preload, { timeout: 2500 }) : setTimeout(preload, 600))
+  if (document.readyState === 'complete') idle()
+  else window.addEventListener('load', idle, { once: true })
 
   let started = false
   const open = async (e?: Event) => {
     if (started) return
     started = true
     e?.preventDefault()
-    const ready = loadApp().then(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))))
+    const ready = loadApp()
     // Tudo que precisa de "gesto do usuário" acontece aqui, de forma síncrona:
     requestTilt()
     requestShake()
     music.start()
     sfx.sparkle()
     vibrate([14, 40, 10])
-
-    const reduced = prefersReducedMotion()
-    el.classList.add('is-opening')
     el.setAttribute('aria-hidden', 'true')
-    if (reduced) {
-      await ready
-      el.classList.add('is-gone')
-      unlock()
-      appState.open()
-      await wait(500)
-      el.remove()
-      return
-    }
-    await wait(560) // asas batendo rápido
-    await ready // em celular lento, a borboleta continua batendo as asas até o app estar pronto
+
+    // asas abrem + brilho na hora; a tela some assim que o app estiver pronto (sem espera artificial)
+    const reduced = prefersReducedMotion()
     el.classList.add('is-open')
-    vibrate(10)
-    const bf = el.querySelector('.bf-wrap')!.getBoundingClientRect()
-    butterflyBurst({ x: bf.left + bf.width / 2, y: bf.top + bf.height / 2, count: 10, towardCamera: true })
-    await wait(380)
+    if (!reduced) {
+      const bf = el.querySelector('.bf-wrap')!.getBoundingClientRect()
+      butterflyBurst({ x: bf.left + bf.width / 2, y: bf.top + bf.height / 2, count: 10, towardCamera: true })
+    }
+    await ready
     unlock()
-    appState.open()
     el.classList.add('is-gone')
-    await wait(950)
+    // avisa o app no quadro seguinte: o esmaecer já começou (roda no compositor) enquanto o convite se monta
+    requestAnimationFrame(() => setTimeout(() => appState.open()))
+    await wait(reduced ? 200 : 600)
     el.remove()
   }
 
