@@ -134,7 +134,7 @@ export function CatchCounter() {
                 exit={{ scale: 0.9, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 260, damping: 18 }}
                 onClick={(e) => e.stopPropagation()}
-                className="card holo-border w-full max-w-[340px] !bg-white p-6 text-center"
+                className="card holo-border w-full max-w-[340px] bg-white p-6 text-center"
               >
                 <div className="flex justify-center gap-1" aria-hidden="true">
                   <ButterflyIcon size={30} speed={0.3} />

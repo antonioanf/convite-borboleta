@@ -53,7 +53,7 @@ export function Destaque() {
             <div data-parallax className="absolute inset-[-7%_0]">
               <Photo foto={foto} sizes="(max-width: 480px) 92vw, 450px" />
             </div>
-            <span className="label absolute bottom-3 left-3 rounded-full bg-white/85 px-3 py-1.5 !text-[11px] !text-roxo">
+            <span className="label absolute bottom-3 left-3 rounded-full bg-white/85 px-3 py-1.5 text-[11px] text-roxo">
               Ensaio de fotos
             </span>
           </motion.div>

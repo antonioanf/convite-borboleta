@@ -130,7 +130,7 @@ export function Candles() {
 
   return (
     <div className="flex h-full flex-col items-center justify-between gap-2 text-center" data-velas={lit ? 'acesas' : 'apagadas'}>
-      <span className="label !text-[10px] !tracking-[0.16em]">
+      <span className="label text-[10px] tracking-[0.16em]">
         {c.idade} {c.idade === 1 ? 'velinha' : 'velinhas'}
       </span>
       <button

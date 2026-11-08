@@ -44,7 +44,7 @@ function Unit({ value, label, digits = 2 }: { value: number; label: string; digi
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
       <Flip value={String(value).padStart(digits, '0')} />
-      <span className="label !text-[11px] !tracking-[0.16em]">{label}</span>
+      <span className="label text-[11px] tracking-[0.16em]">{label}</span>
     </div>
   )
 }
@@ -131,8 +131,8 @@ export function Countdown() {
         {phase === 'antes' && (
           <>
             <div className="mb-3 flex items-center justify-between px-1">
-              <span className="label !text-[11px]">até a festa</span>
-              <span className="label flex items-center gap-1.5 !text-[11px]" aria-hidden="true">
+              <span className="label text-[11px]">até a festa</span>
+              <span className="label flex items-center gap-1.5 text-[11px]" aria-hidden="true">
                 <span key={sec} className="live-dot" />
                 ao vivo
               </span>
