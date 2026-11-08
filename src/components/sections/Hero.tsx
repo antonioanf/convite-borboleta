@@ -105,8 +105,7 @@ export function Hero() {
       className="relative pb-12 pt-[max(14px,env(safe-area-inset-top))]"
     >
       <div className="wrap">
-        <motion.div custom={0.1} variants={fade} initial="hide" animate={anim} className="flex items-center justify-between px-1">
-          <span className="label">Convite · Nº {String(c.idade).padStart(2, '0')}</span>
+        <motion.div custom={0.1} variants={fade} initial="hide" animate={anim} className="flex items-center justify-end px-1">
           <span className="label">{dataCurta}</span>
         </motion.div>
 

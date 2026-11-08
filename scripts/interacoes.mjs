@@ -273,6 +273,7 @@ for (const modo of ['leve', '3d']) {
   await page.waitForTimeout(1500)
   const txt = await page.locator('body').innerText()
   check('sem botão de compartilhar o convite', !/compartilh/i.test(txt))
+  check('sem o rótulo "Convite · Nº" no topo', !/convite\s*·\s*n[º°]/i.test(await page.locator('#inicio').innerText()))
 }
 
 // 7) estados da contagem
