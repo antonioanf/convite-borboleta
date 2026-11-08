@@ -1,0 +1,78 @@
+import { defineConfig, type Plugin } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import { convite } from './src/config/convite.ts'
+import { buildIcs } from './src/lib/calendar.ts'
+
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+/**
+ * Lê src/config/convite.ts e:
+ *  - preenche título, descrição, Open Graph e theme-color no index.html;
+ *  - injeta a paleta como variáveis CSS (sem "piscar" a cor padrão);
+ *  - gera /convite.ics (arquivo de agenda) no dev e no build.
+ */
+function convitePlugin(): Plugin {
+  const p = convite.paleta
+  const palette = `:root{--color-noite:${p.noite};--color-ameixa:${p.ameixa};--color-violeta:${p.violeta};--color-violeta-claro:${p.violetaClaro};--color-lilas:${p.lilas};--color-rosa:${p.rosa};--color-dourado:${p.dourado}}`
+  const ogImage = /^https?:/.test(convite.site.imagemOg)
+    ? convite.site.imagemOg
+    : convite.site.url + convite.site.imagemOg
+  const vars: Record<string, string> = {
+    '%TITULO%': esc(convite.site.titulo),
+    '%DESCRICAO%': esc(convite.site.descricao),
+    '%URL%': esc(convite.site.url),
+    '%OG_IMAGE%': esc(ogImage),
+    '%THEME%': p.noite,
+    '%NOME%': esc(convite.crianca.nome),
+    '%PALETA%': palette,
+  }
+  return {
+    name: 'convite-config',
+    transformIndexHtml: {
+      order: 'pre',
+      handler: (html) => Object.entries(vars).reduce((acc, [k, v]) => acc.split(k).join(v), html),
+    },
+    configureServer(server) {
+      server.middlewares.use('/convite.ics', (_req, res) => {
+        res.setHeader('Content-Type', 'text/calendar; charset=utf-8')
+        res.end(buildIcs(convite))
+      })
+    },
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'convite.ics', source: buildIcs(convite) })
+    },
+  }
+}
+
+/** Pré-baixa (sem executar) o chunk do app: o toque de abertura fica instantâneo sem pesar no carregamento. */
+function prefetchApp(): Plugin {
+  return {
+    name: 'prefetch-app',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, ctx) {
+        const bundle = ctx.bundle ?? {}
+        const chunk = Object.values(bundle).find(
+          (c) => c.type === 'chunk' && c.facadeModuleId?.replace(/\\/g, '/').endsWith('src/app/mount.tsx'),
+        )
+        if (!chunk || chunk.type !== 'chunk') return
+        const files = [chunk.fileName, ...chunk.imports].filter((f) => { const c = bundle[f]; return !(c?.type === 'chunk' && c.isEntry) })
+        return files.map((f) => ({ tag: 'link', attrs: { rel: 'prefetch', href: '/' + f, as: 'script' }, injectTo: 'head' as const }))
+      },
+    },
+  }
+}
+
+export default defineConfig({
+  plugins: [react(), tailwindcss(), convitePlugin(), prefetchApp()],
+  build: {
+    target: 'es2020',
+    cssMinify: true,
+    // A cena 3D (three.js) é um chunk separado, carregado só depois da intro.
+    chunkSizeWarningLimit: 1200,
+  },
+  server: { host: false },
+})
