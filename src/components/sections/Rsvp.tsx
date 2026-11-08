@@ -201,11 +201,11 @@ export function Rsvp() {
                   value={recado}
                   onChange={(e) => setRecado(e.target.value)}
                   placeholder="Escreva um carinho ✨"
-                  className="field resize-none !py-3.5 leading-relaxed"
+                  className="field resize-none py-3.5 leading-relaxed"
                 />
               </div>
 
-              <PressButton ref={submitRef} type="submit" className="sheen-loop mt-1 h-[60px] w-full text-[17px]" aria-live="polite">
+              <PressButton ref={submitRef} type="submit" className="sheen-loop mt-1 h-[60px] w-full" aria-live="polite">
                 <AnimatePresence mode="wait" initial={false}>
                   {stage === 'check' ? (
                     <motion.span
