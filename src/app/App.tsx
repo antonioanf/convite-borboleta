@@ -14,6 +14,12 @@ import { Rsvp } from '../components/sections/Rsvp'
 import { Pix } from '../components/sections/Pix'
 import { Footer } from '../components/sections/Footer'
 import { attachFieldInput, field } from '../lib/butterflyField'
+import { ProgressBar } from '../components/fun/ProgressBar'
+import { CatchCounter } from '../components/fun/CatchCounter'
+import { onShake, fakeShake } from '../lib/shake'
+import { vibrate } from '../lib/haptics'
+import { sfx } from '../lib/sfx'
+import { debug } from '../lib/debug'
 import { perf } from '../lib/perf'
 import { initScroll, gsap, ScrollTrigger } from '../lib/scroll'
 
@@ -35,6 +41,15 @@ export function App() {
     const lenis = initScroll()
     lenis.stop()
     attachFieldInput()
+    // easter egg: chacoalhar o celular solta uma revoada
+    const off = onShake(() => {
+      field.flock(perf.isLite() ? 5 : 8)
+      vibrate([20, 40, 20, 40, 20])
+      sfx.sparkle()
+    })
+    // ganchos para os testes automáticos (npm run testes)
+    if (import.meta.env.DEV || debug.teste) Object.assign(window, { __convite: { field, fakeShake } })
+    return off
   }, [])
 
   useEffect(() => {
@@ -65,6 +80,16 @@ export function App() {
         })
       })
     }
+    // fotos com parallax dentro da moldura
+    if (!perf.reducedMotion) {
+      gsap.utils.toArray<HTMLElement>('[data-parallax]').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { yPercent: -6 },
+          { yPercent: 6, ease: 'none', scrollTrigger: { trigger: el.parentElement, start: 'top bottom', end: 'bottom top', scrub: 0.6 } },
+        )
+      })
+    }
     const onLoad = () => ScrollTrigger.refresh()
     window.addEventListener('load', onLoad)
     return () => {
@@ -77,6 +102,7 @@ export function App() {
   return (
     <>
       <Mesh />
+      <ProgressBar />
       <main className="page" aria-hidden={!opened}>
         <Hero />
         <Destaque />
@@ -95,6 +121,7 @@ export function App() {
         </Suspense>
       )}
       <BottomBar />
+      <CatchCounter />
     </>
   )
 }

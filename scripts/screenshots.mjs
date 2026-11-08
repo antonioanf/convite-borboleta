@@ -15,7 +15,7 @@ const outDir = args.find((a) => !a.startsWith('http') && !a.startsWith('--')) ??
 const video = args.includes('--video')
 const only = args.find((a) => a.startsWith('--only='))?.slice(7).split(',')
 const query = args.find((a) => a.startsWith('--query='))?.slice(8)
-const sections = (args.find((a) => a.startsWith('--sections='))?.slice(11) ?? 'inicio,contagem,local,galeria,confirmar,presentes,footer').split(',')
+const sections = (args.find((a) => a.startsWith('--sections='))?.slice(11) ?? 'inicio,tres,contagem,local,galeria,velinhas,confirmar,presentes,footer').split(',')
 
 const strip = ({ defaultBrowserType, ...d }) => d // eslint-disable-line no-unused-vars
 const targets = [
@@ -74,7 +74,7 @@ for (const t of targets) {
     scrollWidth: document.documentElement.scrollWidth,
     innerWidth: window.innerWidth,
     lite: document.documentElement.classList.contains('lite'),
-    canvas3d: !!document.querySelector('canvas[data-engine]') || document.querySelectorAll('canvas').length > 1,
+    canvas3d: !!document.querySelector('canvas[data-engine]'),
   }))
   report.push({ device: t.name, introMs, ...overflow, horizontalScroll: overflow.scrollWidth > overflow.innerWidth, errors })
   await context.close()

@@ -140,7 +140,7 @@ export function Hero() {
           {c.frase}
         </motion.p>
         <motion.div custom={1.4} variants={fade} initial="hide" animate={anim} className="mt-3 flex items-center justify-between px-1">
-          <span className="label">Toque na tela ✨</span>
+          <span className="label">Toque nas borboletas ✨</span>
           <span className="label flex items-center gap-1.5" aria-hidden="true">
             Role
             <motion.svg width="14" height="14" viewBox="0 0 24 24" animate={perf.reducedMotion ? undefined : { y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}>

@@ -7,8 +7,12 @@
  *  - voo curvo e orgânico (ruído suave no rumo + desvio das bordas)
  *  - fogem do dedo quando ele chega perto
  *  - algumas pousam em elementos com `data-perch="fx,fy,ângulo;..."`
- *  - um toque faz nascer uma borboleta pequena; arrastar deixa um rastro de brilhos
+ *  - um toque numa área vazia solta 2–3 borboletas; arrastar deixa um rastro de brilhos
+ *  - tocar numa borboleta "pega" ela (vira brilho e soma no contador); outra entra voando depois
+ *  - chacoalhar o celular solta uma revoada (flock)
  */
+import { vibrate } from './haptics'
+import { sfx } from './sfx'
 
 export type BState = 'fly' | 'approach' | 'perched' | 'leave'
 
@@ -82,8 +86,11 @@ class ButterflyField {
   time = 0
   running = false
   ambientCount = 8
-  maxSpawned = 6
+  maxSpawned = 8
   maxSparkles = 120
+  /** borboletas pegas pela pessoa (meta: CATCH_GOAL) */
+  caught = 0
+  private catchListeners = new Set<(n: number) => void>()
   slow = false
   private slots: PerchSlot[] = []
   private nextPerchScan = 0
@@ -157,23 +164,89 @@ class ButterflyField {
     if (i >= 0) this.butterflies.splice(i, 1)
   }
 
-  /** Toque: nasce uma borboleta pequena no ponto. */
+  /** Toque numa área vazia: 2–3 borboletas saem voando dali. */
   spawnAt(x: number, y: number) {
-    const spawned = this.butterflies.filter((b) => isFinite(b.life))
-    if (spawned.length >= this.maxSpawned) this.remove(spawned[0])
-    const a = rand(-Math.PI * 0.85, -Math.PI * 0.15)
-    this.add({
-      x,
-      y,
-      vx: Math.cos(a) * 90,
-      vy: Math.sin(a) * 90,
-      vz: 1.2,
-      z: -0.4,
-      size: rand(22, 28),
-      life: rand(8, 13),
-      flapRate: 24,
-    })
+    const n = 2 + (Math.random() < 0.5 ? 1 : 0)
+    for (let k = 0; k < n; k++) {
+      const spawned = this.butterflies.filter((b) => isFinite(b.life))
+      if (spawned.length >= this.maxSpawned) this.remove(spawned[0])
+      const a = rand(-Math.PI * 0.9, -Math.PI * 0.1)
+      const sp = rand(110, 190)
+      this.add({
+        x: x + rand(-8, 8),
+        y: y + rand(-8, 8),
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp,
+        vz: 1.2,
+        z: -0.4,
+        size: rand(28, 38),
+        life: rand(8, 12),
+        flapRate: 24,
+        scaredUntil: this.time + 0.6,
+      })
+    }
     this.emitSparkles(x, y, 14, 140)
+  }
+
+  /** Revoada que entra pelas bordas (chacoalhar o celular). Ficam um tempo e dá para pegar. */
+  flock(n = 7) {
+    if (!this.running) return
+    for (let k = 0; k < n; k++) {
+      const fromLeft = k % 2 === 0
+      const y = rand(this.height * 0.2, this.height * 0.75)
+      const x = fromLeft ? -30 : this.width + 30
+      const a = fromLeft ? rand(-0.5, 0.3) : Math.PI + rand(-0.3, 0.5)
+      const sp = rand(160, 240)
+      this.add({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, vz: rand(0.5, 1.5), size: rand(30, 44), life: rand(9, 13), flapRate: 26 })
+    }
+  }
+
+  /** Tenta pegar a borboleta mais próxima do ponto. Retorna true se pegou. */
+  catchAt(x: number, y: number) {
+    if (!this.running) return false
+    let best: Butterfly | null = null
+    let bestD = Infinity
+    for (const b of this.butterflies) {
+      if (b.life < 3) continue // revoadas rápidas de comemoração não contam
+      const d = Math.hypot(b.x - x, b.y - y)
+      const r = Math.max(36, b.size * 0.8)
+      if (d < r && d < bestD) {
+        best = b
+        bestD = d
+      }
+    }
+    if (!best) return false
+    const wasAmbient = !isFinite(best.life)
+    this.remove(best)
+    this.emitSparkles(best.x, best.y, 26, 200)
+    this.caught++
+    this.catchListeners.forEach((l) => l(this.caught))
+    vibrate([10, 30, 16])
+    sfx.pop()
+    // outra borboleta entra voando depois de alguns segundos (dá para chegar a 10 sem esperar muito)
+    setTimeout(() => this.enter(wasAmbient), rand(2200, 3800))
+    return true
+  }
+
+  /** Uma borboleta entra voando por uma borda. */
+  private enter(ambient: boolean) {
+    if (!this.running) return
+    const ambientNow = this.butterflies.filter((b) => !isFinite(b.life)).length
+    const keep = ambient || ambientNow < this.ambientCount
+    const side = Math.floor(Math.random() * 3) // 0 esquerda, 1 direita, 2 baixo
+    const x = side === 0 ? -30 : side === 1 ? this.width + 30 : rand(40, this.width - 40)
+    const y = side === 2 ? this.height + 30 : rand(this.height * 0.2, this.height * 0.7)
+    const tx = this.width * rand(0.3, 0.7)
+    const ty = this.height * rand(0.3, 0.6)
+    const a = Math.atan2(ty - y, tx - x)
+    this.add({ x, y, vx: Math.cos(a) * 150, vy: Math.sin(a) * 150, size: rand(36, 50), life: keep ? Infinity : rand(12, 16), lander: keep && Math.random() < 0.4 })
+  }
+
+  onCatch(l: (n: number) => void) {
+    this.catchListeners.add(l)
+    return () => {
+      this.catchListeners.delete(l)
+    }
   }
 
   /** Revoada rápida (ex.: ao confirmar presença). */
@@ -186,7 +259,7 @@ class ButterflyField {
     this.emitSparkles(x, y, 24, 220)
   }
 
-  emitSparkles(x: number, y: number, n: number, speed = 40) {
+  emitSparkles(x: number, y: number, n: number, speed = 40, life = 0) {
     for (let i = 0; i < n; i++) {
       const a = rand(0, TAU)
       const s = rand(0.2, 1) * speed
@@ -196,7 +269,7 @@ class ButterflyField {
         vx: Math.cos(a) * s,
         vy: Math.sin(a) * s - 10,
         life: 0,
-        max: rand(0.5, 1.1),
+        max: life || rand(0.5, 1.1),
         size: rand(1.2, 3.2),
         hue: Math.random(),
       })
@@ -455,7 +528,9 @@ export function attachFieldInput() {
   let lastEmit = 0
   let moved = 0
   let downTarget: EventTarget | null = null
+  let downCaught = false
 
+  const isTyping = (el: EventTarget | null) => el instanceof Element && !!el.closest('input, textarea, select, [role="dialog"]')
   const isInteractive = (el: EventTarget | null) =>
     el instanceof Element &&
     !!el.closest('button, a, input, textarea, select, label, [role="button"], [data-no-spawn], [role="dialog"]')
@@ -470,6 +545,8 @@ export function attachFieldInput() {
     downT = performance.now()
     moved = 0
     downTarget = target
+    // pegar no instante do toque (antes de a borboleta fugir do dedo)
+    downCaught = !isTyping(target) && field.catchAt(x, y)
   }
   const move = (x: number, y: number) => {
     moved += Math.hypot(x - field.pointer.x, y - field.pointer.y)
@@ -479,7 +556,7 @@ export function attachFieldInput() {
     const now = performance.now()
     if (now - lastEmit > 16) {
       lastEmit = now
-      field.emitSparkles(x, y, 3, 30)
+      field.emitSparkles(x, y, 2, 30, 0.6)
     }
   }
   const up = (x: number, y: number, cancelled: boolean) => {
@@ -487,7 +564,10 @@ export function attachFieldInput() {
     field.pointer.t = field.time
     const quick = performance.now() - downT < 350
     const still = Math.hypot(x - downX, y - downY) < 10 && moved < 14
-    if (!cancelled && quick && still && field.running && !isInteractive(downTarget)) field.spawnAt(x, y)
+    if (!cancelled && quick && still && !downCaught && field.running && !isInteractive(downTarget)) {
+      field.spawnAt(x, y)
+      vibrate(12)
+    }
   }
 
   // Toque: eventos touch continuam chegando durante a rolagem (pointer seria cancelado).

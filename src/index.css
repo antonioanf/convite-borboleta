@@ -871,3 +871,24 @@ html.lite .dock {
     opacity: 0;
   }
 }
+
+/* ---------- Pegue as borboletas ---------- */
+.catch-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.9);
+  border: 1px solid color-mix(in srgb, var(--color-violeta) 18%, transparent);
+  box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--color-violeta) 80%, transparent);
+}
+.candles-hit {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+.candles-hit:disabled {
+  cursor: default;
+}

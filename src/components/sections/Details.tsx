@@ -8,6 +8,7 @@ import { PressButton, PressLink } from '../ui/Press'
 import { Icon, IconTile, type IconName } from '../ui/Icons'
 import { ano, dataCurta, diaMes, diaSemana, hora } from '../../lib/datas'
 import { indice } from '../../lib/secoes'
+import { Scratch } from '../fun/Scratch'
 
 const isApple = typeof navigator !== 'undefined' && /iPhone|iPad|Macintosh/.test(navigator.userAgent)
 
@@ -41,14 +42,14 @@ export function Details() {
     <section id="local" aria-labelledby="t-local" className="wrap pb-14">
       <SectionTitle id="t-local" index={indice('local')} kicker="Quando e onde" title="Anote aí" />
       <div className="grid grid-cols-2 gap-3">
-        {/* Data (a raspadinha entra por cima na etapa de interações) */}
-        <Tile icon="calendario" label="Data" className="col-span-2">
-          <div data-scratch-slot className="relative">
+        {/* Data com raspadinha prateada por cima */}
+        <Tile icon="calendario" label="Data · raspe ✨" className="col-span-2">
+          <Scratch>
             <p className="mono whitespace-nowrap text-[clamp(24px,8.6vw,40px)] font-semibold leading-none tracking-tight text-roxo">{dataCurta}</p>
             <p className="mt-2 text-[16px] font-medium text-tinta-2">
               {diaSemana}, {diaMes} de {ano}
             </p>
-          </div>
+          </Scratch>
         </Tile>
 
         <Tile icon="relogio" label="Horário">

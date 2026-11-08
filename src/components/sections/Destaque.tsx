@@ -50,7 +50,9 @@ export function Destaque() {
             className="relative overflow-hidden rounded-[22px]"
             style={{ aspectRatio: `${foto.largura ?? 4} / ${foto.altura ?? 3}` }}
           >
-            <Photo foto={foto} sizes="(max-width: 480px) 92vw, 450px" />
+            <div data-parallax className="absolute inset-[-7%_0]">
+              <Photo foto={foto} sizes="(max-width: 480px) 92vw, 450px" />
+            </div>
             <span className="label absolute bottom-3 left-3 rounded-full bg-white/85 px-3 py-1.5 !text-[11px] !text-roxo">
               Ensaio de fotos
             </span>

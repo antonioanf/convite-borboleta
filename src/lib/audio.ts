@@ -66,6 +66,9 @@ function pause() {
   setTimeout(() => !playing && a.pause(), 380)
 }
 
+/** Contexto de áudio (criado no toque de abertura) — usado também pelos efeitos sonoros. */
+export const audioContext = () => ctx
+
 export const music = {
   isAvailable: () => available,
   isPlaying: () => playing,

@@ -64,7 +64,10 @@ export function Footer() {
         {convite.assinatura && <p className="serif text-[38px] leading-tight text-roxo">{convite.assinatura}</p>}
         <p className={`${convite.assinatura ? 'mt-1 text-[16px] font-medium text-tinta-2' : 'serif text-[40px] leading-tight text-roxo'}`}>Esperamos você!</p>
         <p className="label mt-3">
-          {convite.crianca.nome} · {convite.crianca.idade} aninhos · {dataCurta}
+          {convite.crianca.nome} · {dataCurta}
+        </p>
+        <p className="mt-5 rounded-full border border-dashed border-violeta/35 px-4 py-2 text-[13px] font-semibold text-tinta-2">
+          Psiu… chacoalhe o celular 📳
         </p>
       </div>
       {convite.secoes.compartilhar && (
