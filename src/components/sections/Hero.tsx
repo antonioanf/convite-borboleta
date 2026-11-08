@@ -40,7 +40,7 @@ function Letters({ text, offset, anim }: { text: string; offset: number; anim: s
   )
 }
 
-/** Selo redondo com o "3" holográfico e um anel de texto girando. */
+/** Selo redondo com a idade holográfica e um anel de texto girando. */
 function Sticker({ anim }: { anim: string }) {
   const num = useRef<HTMLSpanElement>(null)
   useHolo(num)

@@ -25,7 +25,7 @@ function CountUp({ to, className }: { to: number; className?: string }) {
   )
 }
 
-/** Bento "3 aninhos": foto girando (formato original, sem cortar) + "3" holográfico + dias que faltam. */
+/** Bento da idade: foto girando (formato original, sem cortar) + número holográfico + dias que faltam. */
 export function Destaque() {
   const three = useRef<HTMLSpanElement>(null)
   useHolo(three)
@@ -52,7 +52,7 @@ export function Destaque() {
           >
             <Photo foto={foto} sizes="(max-width: 480px) 92vw, 450px" />
             <span className="label absolute bottom-3 left-3 rounded-full bg-white/85 px-3 py-1.5 !text-[11px] !text-roxo">
-              Ensaio · {c.idade} anos
+              Ensaio de fotos
             </span>
           </motion.div>
         </Card>

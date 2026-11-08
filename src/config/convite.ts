@@ -36,7 +36,7 @@ export interface Paleta {
   roxo: string
   /** Rosa (glacê do bolo) */
   rosa: string
-  /** Magenta: acento (borboleta rosa / "3" do bolo) */
+  /** Magenta: acento (borboleta rosa / número do bolo) */
   magenta: string
   /** Prata iridescente (balões metalizados) + os dois toques do gradiente holográfico */
   prata: string
@@ -81,7 +81,7 @@ export interface ConviteConfig {
   assinatura: string
   /** Foto principal (hero) */
   fotoPrincipal: Foto
-  /** Foto horizontal do cartão "3 aninhos" */
+  /** Foto horizontal do cartão da idade */
   fotoDestaque: Foto
   /** Foto vertical da seção das velinhas */
   fotoBolo: Foto
@@ -128,7 +128,7 @@ const deitada: Foto = {
 const girando: Foto = {
   src: '/fotos/anna-girando.webp',
   srcPequena: '/fotos/anna-girando-600.webp',
-  alt: 'Anna Liz rodopiando com o vestido lilás, entre balões, borboletas metalizadas e um balão do número 3',
+  alt: 'Anna Liz rodopiando com o vestido lilás, entre balões lilás e grandes borboletas metalizadas',
   largura: 1200,
   altura: 1048,
   foco: '40% 50%',
@@ -136,7 +136,7 @@ const girando: Foto = {
 const bolo: Foto = {
   src: '/fotos/anna-bolo.webp',
   srcPequena: '/fotos/anna-bolo-600.webp',
-  alt: 'Anna Liz de tiara olhando sorridente para o seu bolo cor-de-rosa com o número 3 e uma borboleta escrita Anna Liz',
+  alt: 'Anna Liz de tiara olhando sorridente para o seu bolo cor-de-rosa com uma borboleta escrita Anna Liz',
   largura: 888,
   altura: 1600,
   foco: '50% 78%',
@@ -144,7 +144,7 @@ const bolo: Foto = {
 const balao3: Foto = {
   src: '/fotos/anna-balao3.webp',
   srcPequena: '/fotos/anna-balao3-600.webp',
-  alt: 'Anna Liz deitada com a mão no rosto ao lado de um grande balão roxo do número 3 e flores de balão',
+  alt: 'Anna Liz deitada com a mão no rosto entre balões roxos metalizados e flores de balão',
   largura: 1195,
   altura: 1062,
   foco: '0% 50%',
@@ -153,8 +153,8 @@ const balao3: Foto = {
 export const convite: ConviteConfig = {
   crianca: {
     nome: 'Anna Liz',
-    idade: 3,
-    frase: 'Vem voar comigo nos meus 3 aninhos!',
+    idade: 4,
+    frase: 'Vem voar comigo nos meus 4 aninhos!',
   },
   festa: {
     // TODO: horário a definir. Troque o 16:00 pelo horário certo e mude `horarioDefinido` para true.
@@ -209,8 +209,8 @@ export const convite: ConviteConfig = {
   site: {
     // TODO: endereço publicado (sem barra no final). Sem ele, a imagem da prévia no WhatsApp não aparece.
     url: '',
-    titulo: 'Anna Liz · 3 aninhos',
-    descricao: 'Domingo, 16 de maio de 2027 · Chácara São Pedro. Vem voar comigo nos meus 3 aninhos! 🦋',
+    titulo: 'Anna Liz · 4 aninhos',
+    descricao: 'Domingo, 16 de maio de 2027 · Chácara São Pedro. Vem voar comigo nos meus 4 aninhos! 🦋',
     imagemOg: '/og.jpg',
   },
 }

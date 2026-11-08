@@ -272,7 +272,7 @@ html.lite .card-blur {
   z-index: 3;
 }
 
-/* Texto holográfico (o "3", destaques) */
+/* Texto holográfico (idade, destaques) */
 .holo-text {
   color: var(--color-violeta-txt);
   background-image: linear-gradient(
@@ -572,7 +572,7 @@ html.lite .card-blur {
   will-change: transform, opacity;
 }
 
-/* Selo redondo "3 aninhos" */
+/* Selo redondo da idade */
 .sticker {
   display: grid;
   place-items: center;
