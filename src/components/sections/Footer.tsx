@@ -1,16 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { motion, useAnimationControls } from 'framer-motion'
 import { convite } from '../../config/convite'
-import { shareInvite } from '../../lib/share'
-import { vibrate } from '../../lib/haptics'
-import { PressButton } from '../ui/Press'
 import { ButterflyIcon } from '../ui/ButterflyIcon'
-import { Icon } from '../ui/Icons'
 import { perf } from '../../lib/perf'
 import { dataCurta } from '../../lib/datas'
 
 export function Footer() {
-  const [msg, setMsg] = useState<string | null>(null)
   const end = useRef<HTMLDivElement>(null)
   const fly = useAnimationControls()
   const flown = useRef(false)
@@ -42,19 +37,6 @@ export function Footer() {
     return () => io.disconnect()
   }, [fly])
 
-  const share = async () => {
-    vibrate(10)
-    const url = convite.site.url || location.origin
-    const res = await shareInvite({
-      title: convite.site.titulo,
-      text: `${convite.crianca.nome} vai fazer ${convite.crianca.idade} aninhos! 🦋 Veja o convite:`,
-      url,
-    })
-    if (res === 'copied') setMsg('Link copiado! Agora é só colar 💜')
-    else if (res === 'failed') setMsg(`Copie o link: ${url}`)
-    if (res === 'copied' || res === 'failed') setTimeout(() => setMsg(null), 3500)
-  }
-
   return (
     <footer className="wrap pb-10 pt-4 text-center">
       <div ref={end} className="relative mx-auto flex flex-col items-center">
@@ -70,17 +52,6 @@ export function Footer() {
           Psiu… chacoalhe o celular 📳
         </p>
       </div>
-      {convite.secoes.compartilhar && (
-        <div className="mt-7">
-          <PressButton variant="soft" onClick={share} className="w-full">
-            <Icon name="compartilhar" size={20} />
-            Compartilhar convite
-          </PressButton>
-          <p className="mt-3 min-h-6 text-[15px] font-semibold text-magenta-txt" role="status" aria-live="polite">
-            {msg}
-          </p>
-        </div>
-      )}
     </footer>
   )
 }

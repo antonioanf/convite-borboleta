@@ -20,7 +20,7 @@ export function mountDesktop() {
         <p style="margin-top:12px;font-size:18px;font-weight:600;color:var(--color-tinta-2)">vai fazer ${c.idade} aninhos 🦋</p>
       </div>
       <div class="desk-phone"><iframe title="Convite de ${c.nome}" src="${src.href}"
-        allow="autoplay; clipboard-write; web-share; accelerometer; gyroscope; vibrate; microphone"></iframe></div>
+        allow="autoplay; clipboard-write; accelerometer; gyroscope; vibrate; microphone"></iframe></div>
       <div class="desk-side" style="color:var(--color-tinta-2);font-size:16px;font-weight:500;line-height:1.6">
         <p class="label">Feito para o celular</p>
         <p style="margin-top:10px">Abra o link no WhatsApp para a experiência completa: toque nas borboletas, raspe a data e apague as velinhas ✨</p>

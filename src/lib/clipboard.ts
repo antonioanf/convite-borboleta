@@ -23,18 +23,3 @@ export async function copyText(text: string): Promise<boolean> {
     return false
   }
 }
-
-export type ShareResult = 'shared' | 'copied' | 'cancelled' | 'failed'
-
-/** Web Share API com fallback para copiar o link. */
-export async function shareInvite(data: { title: string; text: string; url: string }): Promise<ShareResult> {
-  if (typeof navigator.share === 'function') {
-    try {
-      await navigator.share(data)
-      return 'shared'
-    } catch (e) {
-      if ((e as Error)?.name === 'AbortError') return 'cancelled'
-    }
-  }
-  return (await copyText(`${data.text} ${data.url}`)) ? 'copied' : 'failed'
-}

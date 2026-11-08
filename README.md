@@ -7,7 +7,7 @@ Visual "iridescente tech": fundo perolado, gradientes holográficos, cartões em
 - Hero com a foto principal em "cartão holográfico", que inclina com o giroscópio ou o dedo
 - Borboletas 3D/2D que fogem do dedo, pousam na foto e **podem ser pegas** (meta: 10)
 - Raspadinha prateada na data, velinhas para apagar segurando o dedo (ou soprando), chacoalhar o celular solta uma revoada
-- Contagem regressiva, local e agenda, galeria com lightbox, confirmação pelo WhatsApp, Pix e compartilhar
+- Contagem regressiva, local e agenda, galeria com lightbox, confirmação pelo WhatsApp e Pix
 
 **Lighthouse (mobile, build de produção, Lighthouse 13):** Performance 96 · Acessibilidade 100 · Boas práticas 100 · SEO 100.
 

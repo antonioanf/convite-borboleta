@@ -102,7 +102,6 @@ export interface ConviteConfig {
     velinhas: boolean
     rsvp: boolean
     pix: boolean
-    compartilhar: boolean
   }
   /** Usado nas meta tags (prévia do link no WhatsApp) */
   site: {
@@ -200,7 +199,6 @@ export const convite: ConviteConfig = {
     velinhas: true,
     rsvp: true,
     pix: true,
-    compartilhar: true,
   },
   site: {
     // TODO: endereço publicado (sem barra no final). Sem ele, a imagem da prévia no WhatsApp não aparece.

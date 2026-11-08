@@ -259,6 +259,14 @@ for (const modo of ['leve', '3d']) {
   }
 }
 
+// 6b) sem compartilhar: só os pais enviam o link
+{
+  const page = await newPage('?abrir=1')
+  await page.waitForTimeout(1500)
+  const txt = await page.locator('body').innerText()
+  check('sem botão de compartilhar o convite', !/compartilh/i.test(txt))
+}
+
 // 7) estados da contagem
 for (const [nome, agora] of [['hoje', `${dia}T10:00`], ['depois', `${diaSeguinte}T10:00`]]) {
   const page = await newPage(`?abrir=1&agora=${agora}`)
