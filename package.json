@@ -11,7 +11,9 @@
     "shots": "node scripts/screenshots.mjs",
     "og": "node scripts/gerar-og.mjs",
     "testes": "node scripts/interacoes.mjs",
-    "fotos": "node scripts/fotos.mjs"
+    "perf": "node scripts/desempenho.mjs",
+    "fotos": "node scripts/fotos.mjs",
+    "borboleta": "node scripts/borboleta.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

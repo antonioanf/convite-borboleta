@@ -27,6 +27,8 @@
     <link rel="preload" href="/fonts/manrope.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/jetbrains-mono.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- foto principal (hero): começa a baixar junto com o HTML -->
+    <link rel="preload" as="image" href="%HERO_SRC%" imagesrcset="%HERO_SRCSET%" imagesizes="(max-width: 480px) 92vw, 450px" fetchpriority="high" />
 
     <style>%PALETA%</style>
     <script>
@@ -36,7 +38,7 @@
         try { framed = window.self !== window.top } catch (e) { framed = true }
         if (framed) d.classList.add('framed')
         if (!framed && window.matchMedia && matchMedia('(min-width: 820px) and (hover: hover) and (pointer: fine)').matches) d.classList.add('desk')
-        else d.classList.add('locked')
+        else d.classList.add('locked', 'pre') // pre: a intro está na tela
       })()
     </script>
     <!-- CSS crítico: só o necessário para a intro aparecer instantaneamente -->
@@ -74,12 +76,21 @@
         -webkit-mask: radial-gradient(closest-side, #000 20%, transparent 72%); mask: radial-gradient(closest-side, #000 20%, transparent 72%);
         opacity: .55; animation: halo 3.2s ease-in-out infinite; will-change: transform, opacity; }
       @keyframes halo { 0%,100% { transform: scale(.86) rotate(0deg); opacity: .4 } 50% { transform: scale(1.04) rotate(40deg); opacity: .75 } }
-      .bf { position: relative; width: 190px; height: 176px; overflow: visible; animation: float 4s ease-in-out infinite; filter: drop-shadow(0 18px 26px rgba(139,92,246,.35)); }
+      /* borboleta: imagem embutida (data URI) para aparecer junto com o HTML; o eixo do corpo fica no meio */
+      .bf { position: relative; width: 200px; aspect-ratio: %BORBOLETA_RATIO%; perspective: 520px; animation: float 4s ease-in-out infinite; }
       @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
-      .bf .wl, .bf .wr { transform-box: view-box; transform-origin: 0 0; animation: idle 2.6s ease-in-out infinite; }
-      @keyframes idle { 0%,100% { transform: scaleX(1) } 50% { transform: scaleX(.78) } }
-      .bf .sheen { animation: sheen 3.6s ease-in-out infinite; }
-      @keyframes sheen { 0% { transform: translateX(-90px) } 55%,100% { transform: translateX(90px) } }
+      .bf i { position: absolute; top: 0; bottom: 0; background: url(%BORBOLETA%) no-repeat; }
+      /* sombra parada (um drop-shadow teria de ser recalculado a cada quadro com as asas mexendo) */
+      .bf .bf-shadow { top: auto; left: 18%; right: 18%; bottom: -18px; height: 26px; border-radius: 50%; background: radial-gradient(closest-side, rgba(139,92,246,.32), transparent); }
+      /* cada asa é um elemento com metade da largura mostrando a sua metade da imagem;
+         gira em rotateY a partir do corpo (a borda que encosta no meio) */
+      .bf .bf-wing { width: 50%; background-size: 200% 100%; will-change: transform; }
+      .bf .bf-l { left: 0; background-position: left center; transform-origin: 100% 50%; animation: wing-l 2.6s ease-in-out infinite; }
+      .bf .bf-r { left: 50%; background-position: right center; transform-origin: 0 50%; animation: wing-r 2.6s ease-in-out infinite; }
+      @keyframes wing-l { 0%,100% { transform: rotateY(0) } 50% { transform: rotateY(56deg) } }
+      @keyframes wing-r { 0%,100% { transform: rotateY(0) } 50% { transform: rotateY(-56deg) } }
+      /* corpo: faixa fina no meio (3,2% da largura), por cima da raiz das asas */
+      .bf .bf-body { left: 48.4%; width: 3.2%; background-size: 3125% 100%; background-position: center; }
 
       .intro-cta { position: relative; margin: 6px 0 0; animation: fadein .9s .4s both; }
       .intro-cta span { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 28px; border-radius: 999px; box-sizing: border-box;
@@ -103,7 +114,7 @@
 
       /* saída (~0,55 s depois do toque): asas abrem, borboleta voa para a câmera, brilho dissolve a tela */
       .intro.is-open { cursor: default; }
-      .intro.is-open .bf .wl, .intro.is-open .bf .wr { animation: none; transform: scaleX(1.14); transition: transform .3s cubic-bezier(.3,.7,.4,1.5); }
+      .intro.is-open .bf .bf-wing { animation: none; transform: rotateY(0); transition: transform .25s cubic-bezier(.3,.7,.4,1.2); }
       .intro.is-open .bf { animation: none; transform: scale(1.5); opacity: 0; transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .35s .15s ease; }
       .intro.is-open .bf-halo { animation: none; transform: scale(1.6); opacity: 0; transition: transform .5s, opacity .5s; }
       .intro.is-open .intro-top, .intro.is-open .intro-cta, .intro.is-open .intro-date { opacity: 0; transform: translateY(14px); transition: opacity .25s, transform .25s; }
@@ -119,6 +130,7 @@
       @media (prefers-reduced-motion: reduce) {
         .intro *, .intro { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
         .intro * { transition-duration: .01ms !important; }
+        .bf .bf-wing { animation: none !important; transform: none; }
       }
     </style>
   </head>
@@ -131,43 +143,14 @@
       </div>
       <div class="bf-wrap" aria-hidden="true">
         <div class="bf-halo"></div>
-        <svg class="bf" viewBox="-52 -48 104 96">
-          <defs>
-            <linearGradient id="ifw" x1="0" y1="0" x2="1" y2="-1">
-              <stop offset="0" style="stop-color:var(--color-violeta)" />
-              <stop offset=".38" style="stop-color:var(--color-lilas)" />
-              <stop offset=".62" style="stop-color:var(--color-holo-ciano)" />
-              <stop offset=".82" style="stop-color:var(--color-holo-rosa)" />
-              <stop offset="1" style="stop-color:var(--color-prata)" />
-            </linearGradient>
-            <linearGradient id="ihw" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" style="stop-color:var(--color-violeta)" />
-              <stop offset=".45" style="stop-color:var(--color-holo-rosa)" />
-              <stop offset="1" style="stop-color:var(--color-lavanda)" />
-            </linearGradient>
-            <linearGradient id="ish" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#fff" stop-opacity="0" />
-              <stop offset=".5" stop-color="#fff" stop-opacity=".75" />
-              <stop offset="1" stop-color="#fff" stop-opacity="0" />
-            </linearGradient>
-            <clipPath id="iclip">
-              <path d="M2,-5 C8,-28 28,-46 46,-42 C56,-39 55,-22 44,-11 C34,-3 16,-2 2,-2 Z M2,0 C14,1 32,5 39,17 C45,29 35,42 23,38 C13,35 6,22 2,6 Z" />
-            </clipPath>
-            <g id="iwing">
-              <path d="M2,-5 C8,-28 28,-46 46,-42 C56,-39 55,-22 44,-11 C34,-3 16,-2 2,-2 Z" fill="url(#ifw)" />
-              <path d="M2,0 C14,1 32,5 39,17 C45,29 35,42 23,38 C13,35 6,22 2,6 Z" fill="url(#ihw)" />
-              <g clip-path="url(#iclip)"><rect class="sheen" x="-10" y="-50" width="26" height="100" fill="url(#ish)" /></g>
-              <path d="M4,-6 Q22,-20 40,-36 M4,-5 Q26,-14 48,-24 M4,-4 Q24,-8 44,-12 M4,2 Q20,10 32,26 M4,2 Q14,14 20,34" stroke="#fff" stroke-opacity=".7" stroke-width=".7" fill="none" />
-              <path d="M2,-5 C8,-28 28,-46 46,-42 C56,-39 55,-22 44,-11 C34,-3 16,-2 2,-2 Z M2,0 C14,1 32,5 39,17 C45,29 35,42 23,38 C13,35 6,22 2,6 Z" fill="none" style="stroke:var(--color-violeta-txt)" stroke-opacity=".55" stroke-width="1.1" />
-              <circle cx="38" cy="-28" r="3.6" fill="#fff" fill-opacity=".9" />
-              <circle cx="28" cy="25" r="2.6" fill="#fff" fill-opacity=".75" />
-            </g>
-          </defs>
-          <g class="wr"><use href="#iwing" /></g>
-          <g class="wl"><g transform="scale(-1,1)"><use href="#iwing" /></g></g>
-          <ellipse cx="0" cy="2" rx="2.6" ry="15" style="fill:var(--color-roxo)" />
-          <path d="M-1,-12 Q-6,-25 -10,-29 M1,-12 Q6,-25 10,-29" style="stroke:var(--color-roxo)" stroke-width="1.4" fill="none" stroke-linecap="round" />
-        </svg>
+        <!-- borboleta (originais/borboleta.png → npm run borboleta): a mesma imagem em 3 camadas,
+             asa esquerda e direita (cada uma com metade da imagem) girando no eixo do corpo + o corpo parado -->
+        <div class="bf">
+          <i class="bf-shadow"></i>
+          <i class="bf-wing bf-l"></i>
+          <i class="bf-wing bf-r"></i>
+          <i class="bf-body"></i>
+        </div>
         <div class="intro-glow"></div>
       </div>
       <p class="intro-cta">

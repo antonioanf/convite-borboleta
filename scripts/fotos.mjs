@@ -13,7 +13,8 @@ const src = path.join(root, 'originais')
 const out = path.join(root, 'public/fotos')
 fs.mkdirSync(out, { recursive: true })
 
-for (const f of fs.readdirSync(src).filter((f) => /\.(png|jpe?g|webp|heic)$/i.test(f))) {
+// borboleta.png é a borboleta da intro (npm run borboleta), não uma foto
+for (const f of fs.readdirSync(src).filter((f) => /\.(png|jpe?g|webp|heic)$/i.test(f) && !/^borboleta\./i.test(f))) {
   const name = f.replace(/\.[^.]+$/, '')
   const big = path.join(out, `${name}.webp`)
   const small = path.join(out, `${name}-600.webp`)

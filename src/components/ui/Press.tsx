@@ -13,7 +13,7 @@ function moveSpot(e: PointerEvent<HTMLElement>) {
   const spot = el.querySelector<HTMLElement>(':scope > .spot')
   if (!spot) return
   const r = el.getBoundingClientRect()
-  spot.style.transform = `translate3d(${e.clientX - r.left}px, ${e.clientY - r.top}px, 0)`
+  spot.style.transform = `translate(${e.clientX - r.left}px, ${e.clientY - r.top}px)` // 2D: não cria camada
 }
 
 function useButton() {

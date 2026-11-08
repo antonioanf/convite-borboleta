@@ -4,6 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { convite } from './src/config/convite.ts'
 import { buildIcs } from './src/lib/calendar.ts'
 import { temaCss } from './src/config/tema.ts'
+import fs from 'node:fs'
+import sharp from 'sharp'
 
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -22,8 +24,18 @@ function dataCurta() {
     .join(' · ')
 }
 
-function convitePlugin(): Plugin {
+/** Borboleta da intro (npm run borboleta): embutida como data URI + proporção, para a intro aparecer na hora. */
+async function borboleta() {
+  const file = new URL('./src/intro/borboleta.webp', import.meta.url)
+  const buf = fs.readFileSync(file)
+  const { width = 1, height = 1 } = await sharp(buf).metadata()
+  return { uri: `data:image/webp;base64,${buf.toString('base64')}`, ratio: `${width} / ${height}` }
+}
+
+async function convitePlugin(): Promise<Plugin> {
   const p = convite.paleta
+  const bf = await borboleta()
+  const hero = convite.fotoPrincipal
   const palette = temaCss(p)
   // TODO no config: sem site.url a imagem fica relativa e o WhatsApp não mostra a prévia
   const ogImage = /^https?:/.test(convite.site.imagemOg)
@@ -39,6 +51,10 @@ function convitePlugin(): Plugin {
     '%IDADE%': String(convite.crianca.idade),
     '%DATA_CURTA%': dataCurta(),
     '%PALETA%': palette,
+    '%HERO_SRC%': esc(hero.src ?? ''),
+    '%HERO_SRCSET%': esc(hero.srcPequena && hero.src ? `${hero.srcPequena} 600w, ${hero.src} ${hero.largura ?? 1200}w` : hero.src ?? ''),
+    '%BORBOLETA_RATIO%': bf.ratio,
+    '%BORBOLETA%': bf.uri,
   }
   return {
     name: 'convite-config',

@@ -98,18 +98,23 @@ export function EffectsLayer() {
     let last = performance.now()
     let raf = 0
     let drewSomething = true
+    let lastMesh = ''
     const frame = (nowMs: number) => {
       raf = requestAnimationFrame(frame)
       const dt = Math.min(0.05, (nowMs - last) / 1000)
       last = nowMs
       updateTilt(dt)
+      field.step(dt) // lê posições (pouso) antes de qualquer escrita no DOM deste quadro
       updateHolo()
-      field.step(dt)
 
-      // parallax do fundo pela inclinação do aparelho
+      // parallax do fundo pela inclinação do aparelho (só escreve quando muda)
       const ox = tilt.x * 14
       const oy = tilt.y * 14
-      if (mesh) mesh.style.transform = `translate3d(${-ox * 1.4}px, ${-oy * 1.4}px, 0)`
+      const mt = `translate3d(${(-ox * 1.4).toFixed(1)}px, ${(-oy * 1.4).toFixed(1)}px, 0)`
+      if (mesh && mt !== lastMesh) {
+        lastMesh = mt
+        mesh.style.transform = mt
+      }
 
       const draw2D = !renderState.threeReady && field.butterflies.length > 0
       if (!draw2D && !field.sparkles.length) {

@@ -15,7 +15,7 @@ import { sfx } from '../lib/sfx'
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 function unlock() {
-  document.documentElement.classList.remove('locked')
+  document.documentElement.classList.remove('locked', 'pre')
 }
 
 export function initIntro() {
@@ -35,7 +35,11 @@ export function initIntro() {
   // em pedacinhos (startTransition no mount). No toque ele normalmente já está pronto.
   const preload = () => void loadApp()
   el.addEventListener('pointerdown', preload, { once: true, passive: true })
-  const idle = () => ('requestIdleCallback' in window ? requestIdleCallback(preload, { timeout: 2500 }) : setTimeout(preload, 600))
+  // só depois da intro estar pintada (2 quadros), para a primeira pintura não esperar o app
+  const idle = () =>
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => ('requestIdleCallback' in window ? requestIdleCallback(preload, { timeout: 2500 }) : setTimeout(preload, 600))),
+    )
   if (document.readyState === 'complete') idle()
   else window.addEventListener('load', idle, { once: true })
 

@@ -4,7 +4,7 @@ import { useHolo } from '../../lib/holo'
 /**
  * Cartão do bento: fundo claro, borda de 1px translúcida, sombra colorida e um brilho
  * (spotlight) que segue o dedo — ou o mouse, no desktop.
- * `blur` liga o backdrop-filter: use em no máximo 3 elementos na página inteira.
+ * `blur`: fundo branco mais opaco (antes era backdrop-filter, tirado por desempenho).
  * `holo` liga a borda holográfica que muda de cor com a inclinação e o scroll.
  */
 export function Card({
@@ -23,7 +23,7 @@ export function Card({
     const el = ref.current
     if (!el || !spot.current) return
     const r = el.getBoundingClientRect()
-    spot.current.style.transform = `translate3d(${e.clientX - r.left}px, ${e.clientY - r.top}px, 0)`
+    spot.current.style.transform = `translate(${e.clientX - r.left}px, ${e.clientY - r.top}px)` // 2D: não cria camada
   }
   const start = (e: PointerEvent) => {
     clearTimeout(timer.current)

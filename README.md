@@ -138,10 +138,19 @@ npm run fotos     # gera public/fotos/<nome>.webp (até 1200 px) e <nome>-600.we
 npx playwright install chromium webkit   # só na primeira vez
 npm run dev                               # em outro terminal
 npm run shots -- --video                  # screenshots: iPhone 13, Pixel 5, 360x740, 430x932
-npm run testes                            # 24 testes de interação
+npm run testes                            # testes de interação
 ```
 
-`npm run testes` cobre: intro, raspadinha (inclusive que raspar com o dedo não rola a página), velinhas (toque curto não apaga, segurar apaga), pegar 10 borboletas nos modos leve e 3D, toque que solta borboletas, lightbox, RSVP, Pix, `.ics` e os estados da contagem. Os resultados ficam em `screenshots/`.
+`npm run testes` cobre: intro, horário e agenda, raspadinha (inclusive que raspar com o dedo não rola a página), velinhas (toque curto não apaga, segurar apaga), pegar 10 borboletas nos modos leve e 3D, toque que solta borboletas, lightbox, RSVP, Pix, `.ics` e os estados da contagem. Os resultados ficam em `screenshots/`.
+
+### Desempenho (`npm run perf`)
+
+```bash
+npm run build && npm run preview          # em outro terminal (http://localhost:4173)
+npm run perf                              # ou: npm run perf -- http://localhost:4173/ screenshots/desempenho 3
+```
+
+Abre o convite no Chromium emulando um Pixel 5 com a **CPU 4x mais lenta** e mede três fases: abertura (carregar + tocar na intro), scroll do convite inteiro com o dedo e interações (toques, rastro de brilho, raspadinha, velinhas). Para cada fase mostra as tarefas longas (> 50 ms), o tempo bloqueado e o FPS médio (mediana das rodadas), e grava o trace de cada rodada em `screenshots/desempenho/` (abre no DevTools → Performance → *Load profile*).
 
 ## 10. Como funciona por dentro
 
@@ -167,7 +176,12 @@ src/components/
 - **Uma simulação e dois desenhos:** `butterflyField.ts` calcula as borboletas; a cena 3D e o canvas 2D só desenham.
 - **Pouso:** elementos com `data-perch="fx,fy,ângulo;..."` viram lugar de pouso (hoje, a moldura da foto principal).
 - **Modo leve automático:** com `hardwareConcurrency ≤ 4`, `deviceMemory ≤ 4`, sem WebGL, FPS < 45 na cena 3D ou economia de dados.
-- **Desempenho:** DPR máximo 1,5; 3D só depois da intro; animações contínuas só com `transform`/`opacity`; o canvas 2D descansa quando não há nada para desenhar; no máximo 3 elementos com `backdrop-filter` (pill inferior, contagem e confirmação).
+- **Desempenho** (detalhes e números em `npm run perf`, seção 9):
+  - DPR máximo 1,5; 3D só depois da intro; o canvas 2D descansa quando não há nada para desenhar.
+  - Animações contínuas só com `transform`/`opacity` (as entradas dos cartões e as letras do nome não animam mais `filter: blur`).
+  - Nada lê o layout no meio de um quadro: a posição do scroll é lida uma vez no evento de scroll (`lib/scrollPos.ts`), a barra de progresso só mede a altura da página quando ela muda, o pouso das borboletas mede a foto no máximo a cada 0,25 s.
+  - Poucas camadas: o fundo mesh é uma camada animada só (as 4 manchas num elemento) e o grão faz parte do fundo; o brilho que segue o dedo (`.spot`) não tem `will-change`; o `backdrop-filter` ficou só na pill de baixo.
+  - O brilho holográfico só é atualizado nos elementos visíveis, e as animações CSS das seções fora da tela ficam pausadas.
 - **Desktop:** o próprio convite aparece num `<iframe>` dentro de uma moldura de celular.
 
 ### Bibliotecas

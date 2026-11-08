@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { convite } from '../../config/convite'
 import { useOpened } from '../../hooks/useStores'
-import { useOffscreenPause } from '../../hooks/useOffscreenPause'
 import { HoloPhoto } from '../ui/HoloPhoto'
 import { gsap, ScrollTrigger } from '../../lib/scroll'
 import { perf } from '../../lib/perf'
@@ -17,12 +16,11 @@ const fade: Variants = {
 }
 
 const letter: Variants = {
-  hide: { opacity: 0, y: '0.4em', rotate: 8, filter: 'blur(8px)' },
+  hide: { opacity: 0, y: '0.4em', rotate: 8 },
   show: (i: number) => ({
     opacity: 1,
     y: 0,
     rotate: 0,
-    filter: 'blur(0px)',
     transition: { delay: 0.55 + i * 0.07, type: 'spring', stiffness: 260, damping: 20 },
   }),
 }
@@ -76,7 +74,6 @@ export function Hero() {
   const section = useRef<HTMLElement>(null)
   const frame = useRef<HTMLDivElement>(null)
   const img = useRef<HTMLDivElement>(null)
-  useOffscreenPause(section)
   const c = convite.crianca
   const anim = opened ? 'show' : 'hide'
 
@@ -142,9 +139,9 @@ export function Hero() {
           <span className="label">Toque nas borboletas ✨</span>
           <span className="label flex items-center gap-1.5" aria-hidden="true">
             Role
-            <motion.svg width="14" height="14" viewBox="0 0 24 24" animate={perf.reducedMotion ? undefined : { y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}>
+            <svg className="nudge" width="14" height="14" viewBox="0 0 24 24">
               <path d="M12 5v14M6 13l6 6 6-6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            </motion.svg>
+            </svg>
           </span>
         </motion.div>
       </div>

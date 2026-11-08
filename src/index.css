@@ -70,6 +70,17 @@
    então uma classe como py-3.5 ou text-[11px] ganha sem precisar de "!". */
 @layer components {
   /* ---------- Página: uma coluna, sem scroll horizontal acidental ---------- */
+  /* Enquanto a intro cobre a tela, o convite já está montado por baixo, mas não é pintado. */
+  html.pre .page {
+    visibility: hidden;
+  }
+  /* Seções abaixo do início: o navegador só calcula layout/pintura quando elas chegam perto da tela
+     (o tamanho medido fica guardado em "auto", então o scroll não pula). */
+  .page > section:not(#inicio):not(#tres),
+  .page > footer {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 820px;
+  }
   .page {
     position: relative;
     z-index: 10;
@@ -107,75 +118,37 @@
     color: var(--color-tinta-2);
   }
 
-  /* ---------- Fundo: gradiente mesh animado (só transform) + grão ---------- */
+  /* ---------- Fundo: gradiente mesh animado (só transform) + grão ----------
+     Duas camadas: a base (pérola + grão, parada) e as 4 manchas num elemento só, que deriva devagar.
+     As manchas são os mesmos círculos de antes (90vmax e 70vmax), desenhados como radial-gradient. */
   .mesh {
     position: fixed;
     inset: -12%;
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
-    background: var(--color-perola);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .23 0 0 0 0 .11 0 0 0 0 .43 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") repeat, var(--color-perola);
     will-change: transform;
   }
   .mesh-inner {
     position: absolute;
     inset: 0;
   }
-  .mesh i {
+  .mesh-blobs {
     position: absolute;
-    border-radius: 50%;
-    width: 90vmax;
-    height: 90vmax;
+    inset: -10%;
+    background:
+      radial-gradient(circle 35vmax at calc(130% - 35vmax) calc(118% - 35vmax), color-mix(in srgb, var(--color-holo-ciano) 40%, transparent), transparent),
+      radial-gradient(circle 45vmax at calc(-25% + 45vmax) calc(138% - 45vmax), color-mix(in srgb, var(--color-lilas) 50%, transparent), transparent),
+      radial-gradient(circle 45vmax at calc(142% - 45vmax) calc(6% + 45vmax), color-mix(in srgb, var(--color-holo-rosa) 55%, transparent), transparent),
+      radial-gradient(circle 45vmax at calc(-38% + 45vmax) calc(-22% + 45vmax), var(--color-lavanda), transparent);
+    animation: mesh-drift 28s ease-in-out infinite alternate;
     will-change: transform;
   }
-  .mesh i:nth-child(1) {
-    left: -38%;
-    top: -22%;
-    background: radial-gradient(closest-side, var(--color-lavanda), transparent);
-    animation: drift-a 22s ease-in-out infinite alternate;
-  }
-  .mesh i:nth-child(2) {
-    right: -42%;
-    top: 6%;
-    background: radial-gradient(closest-side, color-mix(in srgb, var(--color-holo-rosa) 55%, transparent), transparent);
-    animation: drift-b 26s ease-in-out infinite alternate;
-  }
-  .mesh i:nth-child(3) {
-    left: -25%;
-    bottom: -38%;
-    background: radial-gradient(closest-side, color-mix(in srgb, var(--color-lilas) 50%, transparent), transparent);
-    animation: drift-c 30s ease-in-out infinite alternate;
-  }
-  .mesh i:nth-child(4) {
-    right: -30%;
-    bottom: -18%;
-    width: 70vmax;
-    height: 70vmax;
-    background: radial-gradient(closest-side, color-mix(in srgb, var(--color-holo-ciano) 40%, transparent), transparent);
-    animation: drift-a 34s ease-in-out infinite alternate-reverse;
-  }
-  @keyframes drift-a {
+  @keyframes mesh-drift {
     to {
-      transform: translate3d(16%, 20%, 0) scale(1.12);
+      transform: translate3d(6%, 7%, 0) rotate(8deg) scale(1.08);
     }
-  }
-  @keyframes drift-b {
-    to {
-      transform: translate3d(-22%, 16%, 0) scale(0.9);
-    }
-  }
-  @keyframes drift-c {
-    to {
-      transform: translate3d(18%, -24%, 0) scale(1.18);
-    }
-  }
-  .grain {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.05;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .23 0 0 0 0 .11 0 0 0 0 .43 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   /* Camadas fixas de efeitos (borboletas, brilhos) */
@@ -215,14 +188,8 @@
       0 22px 44px -26px color-mix(in srgb, var(--color-violeta) 55%, transparent),
       0 2px 8px -4px color-mix(in srgb, var(--color-roxo) 14%, transparent);
   }
+  /* cartão "vidro": sem backdrop-filter (desfocar o fundo animado a cada quadro pesava no celular) */
   .card-blur {
-    background: rgb(255 255 255 / 0.55);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    backdrop-filter: blur(18px) saturate(160%);
-  }
-  html.lite .card-blur {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
     background: rgb(255 255 255 / 0.82);
   }
   /* brilho que segue o dedo (spotlight) */
@@ -244,7 +211,7 @@
     transition: opacity 0.35s ease;
     pointer-events: none;
     z-index: -1;
-    will-change: transform, opacity;
+    /* sem will-change: cada .spot virava uma camada e fazia o cartão inteiro virar outra (sobreposição) */
   }
   .is-touched > .spot {
     opacity: 1;
@@ -378,6 +345,16 @@
     color: var(--color-violeta-txt);
     background: linear-gradient(145deg, #fff, var(--color-lavanda));
     border: 1px solid color-mix(in srgb, var(--color-violeta) 16%, transparent);
+  }
+
+  /* seta "Role" do topo */
+  .nudge {
+    animation: nudge 1.6s ease-in-out infinite;
+  }
+  @keyframes nudge {
+    50% {
+      transform: translateY(4px);
+    }
   }
 
   /* ---------- Seções animadas: pausa o que está fora da tela ---------- */
@@ -579,7 +556,6 @@
   }
   .hero-name .ch {
     display: inline-block;
-    will-change: transform, opacity;
   }
 
   /* Selo redondo da idade */

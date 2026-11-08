@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { convite } from '../../config/convite'
 import { useNow } from '../../hooks/useStores'
-import { useOffscreenPause } from '../../hooks/useOffscreenPause'
 import { Card } from '../ui/Card'
 import { SectionTitle } from '../ui/SectionTitle'
 import { ButterflyIcon } from '../ui/ButterflyIcon'
@@ -110,8 +109,6 @@ function Thanks() {
 
 export function Countdown() {
   const nowMs = useNow(1000)
-  const ref = useRef<HTMLElement>(null)
-  useOffscreenPause(ref)
   const phase = partyPhase(nowMs)
   const diff = Math.max(0, new Date(convite.festa.dataHora).getTime() - nowMs)
   const d = Math.floor(diff / 86_400_000)
@@ -120,7 +117,7 @@ export function Countdown() {
   const sec = Math.floor((diff / 1000) % 60)
 
   return (
-    <section ref={ref} id="contagem" aria-labelledby="t-contagem" className="wrap pb-14">
+    <section id="contagem" aria-labelledby="t-contagem" className="wrap pb-14">
       <SectionTitle
         id="t-contagem"
         index={indice('contagem')}

@@ -10,6 +10,7 @@
  *  - um toque numa área vazia solta 2–3 borboletas; arrastar deixa um rastro de brilhos
  *  - tocar numa borboleta "pega" ela (vira brilho e soma no contador); outra entra voando depois
  */
+import { scrollPos } from './scrollPos'
 import { vibrate } from './haptics'
 import { sfx } from './sfx'
 
@@ -291,9 +292,19 @@ class ButterflyField {
     this.slots = keep
   }
 
+  private rects = new Map<Element, { r: DOMRect; y: number; t: number }>()
+
+  /** Posição do ponto de pouso. O retângulo do elemento é medido no máximo a cada 0,25 s
+   *  (medir a cada quadro forçava layout); entre medições, só desconta o scroll. */
   private slotPoint(s: PerchSlot) {
-    const r = s.el.getBoundingClientRect()
-    return { x: r.left + r.width * s.fx, y: r.top + r.height * s.fy, visible: r.width > 0 }
+    let c = this.rects.get(s.el)
+    if (!c || this.time - c.t > 0.25) {
+      c = { r: s.el.getBoundingClientRect(), y: scrollPos.y, t: this.time }
+      this.rects.set(s.el, c)
+    }
+    const r = c.r
+    const dy = scrollPos.y - c.y
+    return { x: r.left + r.width * s.fx, y: r.top - dy + r.height * s.fy, visible: r.width > 0 }
   }
 
   private slotOnScreen(p: { x: number; y: number; visible: boolean }) {

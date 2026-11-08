@@ -57,8 +57,15 @@ export function App() {
     lenis.stop()
     attachFieldInput()
     appState.mounted()
+    // animações CSS (chamas, asas dos ícones, brilhos) ficam pausadas nas seções fora da tela
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.target.classList.toggle('is-offscreen', !e.isIntersecting)),
+      { rootMargin: '120px 0px' },
+    )
+    document.querySelectorAll('.page > section, .page > footer').forEach((el) => io.observe(el))
     // ganchos para os testes automáticos (npm run testes)
     if (import.meta.env.DEV || debug.teste) Object.assign(window, { __convite: { field } })
+    return () => io.disconnect()
   }, [])
 
   useEffect(() => {
@@ -74,13 +81,11 @@ export function App() {
         gsap.utils.toArray<HTMLElement>('.reveal').forEach((el) => {
           gsap.fromTo(
             el,
-            { opacity: 0, y: 48, scale: 0.94, filter: 'blur(10px)' },
+            { opacity: 0, y: 48, scale: 0.94 },
             {
               opacity: 1,
               y: 0,
               scale: 1,
-              filter: 'blur(0px)',
-              clearProps: 'filter',
               duration: 1.1,
               ease: 'expo.out',
               scrollTrigger: { trigger: el, start: 'top 90%', once: true },
@@ -101,8 +106,18 @@ export function App() {
     }
     const onLoad = () => ScrollTrigger.refresh()
     window.addEventListener('load', onLoad)
+    // seções com content-visibility mudam de altura quando são desenhadas: recalcula os gatilhos
+    let rt = 0
+    const ro = new ResizeObserver(() => {
+      clearTimeout(rt)
+      rt = window.setTimeout(() => ScrollTrigger.refresh(), 200)
+    })
+    const page = document.querySelector('.page')
+    if (page) ro.observe(page)
     return () => {
       clearTimeout(t)
+      clearTimeout(rt)
+      ro.disconnect()
       ctx?.revert()
       window.removeEventListener('load', onLoad)
     }

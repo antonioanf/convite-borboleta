@@ -11,8 +11,7 @@ export function mountDesktop() {
   const src = new URL(location.href)
   const c = convite.crianca
   root.innerHTML = `
-    <div class="mesh" aria-hidden="true"><div class="mesh-inner"><i></i><i></i><i></i><i></i></div></div>
-    <div class="grain" aria-hidden="true"></div>
+    <div class="mesh" aria-hidden="true"><div class="mesh-inner"><div class="mesh-blobs"></div></div></div>
     <main class="desk-shell">
       <div class="desk-side" style="text-align:right">
         <p class="label">${dataCurta}</p>
