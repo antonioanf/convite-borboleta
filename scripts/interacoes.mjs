@@ -238,11 +238,24 @@ for (const modo of ['leve', '3d']) {
   }
   const ics = (await (await page.request.get(url + 'convite.ics')).text()).split('\r\n')
   const start = ics.find((l) => l.startsWith('DTSTART')) ?? ''
-  check(
-    convite.festa.horarioDefinido ? '.ics com horário' : '.ics de dia inteiro (horário a definir)',
-    convite.festa.horarioDefinido ? /DTSTART:\d{8}T/.test(start) : start === `DTSTART;VALUE=DATE:${dia.replace(/-/g, '')}`,
-    start,
-  )
+  const end = ics.find((l) => l.startsWith('DTEND')) ?? ''
+  const utc = (ms) => new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+  const t0 = Date.parse(convite.festa.dataHora)
+  const t1 = t0 + convite.festa.duracaoHoras * 3600_000
+  if (convite.festa.horarioDefinido) {
+    check('.ics no horário da festa, com a duração do config', start === `DTSTART:${utc(t0)}` && end === `DTEND:${utc(t1)}`, `${start} ${end}`)
+    await scrollTo(page, 'local')
+    await page.locator('#local button[aria-expanded]').click()
+    await page.waitForTimeout(600)
+    const gcal = await page.locator('#local a[href*="calendar.google.com"]').getAttribute('href').catch(() => null)
+    const dates = gcal ? new URL(gcal).searchParams.get('dates') : null
+    check('Google Agenda no horário da festa, com a duração do config', dates === `${utc(t0)}/${utc(t1)}`, dates ?? 'link não encontrado')
+    const local = await page.locator('#local').innerText()
+    const hhmm = convite.festa.dataHora.slice(11, 16)
+    check(`cartão de Horário mostra ${hhmm}`, local.includes(hhmm) && !local.includes('A definir'))
+  } else {
+    check('.ics de dia inteiro (horário a definir)', start === `DTSTART;VALUE=DATE:${dia.replace(/-/g, '')}`, start)
+  }
 }
 
 // 7) estados da contagem

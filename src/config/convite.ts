@@ -157,9 +157,8 @@ export const convite: ConviteConfig = {
     frase: 'Vem voar comigo nos meus 4 aninhos!',
   },
   festa: {
-    // TODO: horário a definir. Troque o 16:00 pelo horário certo e mude `horarioDefinido` para true.
     dataHora: '2027-05-16T16:00:00-03:00',
-    horarioDefinido: false,
+    horarioDefinido: true,
     duracaoHoras: 4,
     fusoHorario: 'America/Fortaleza',
     local: 'Chácara São Pedro',

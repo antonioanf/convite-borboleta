@@ -15,10 +15,8 @@ export const diaSemana = cap(fmt({ weekday: 'long' }))
 /** "16 de maio" */
 export const diaMes = fmt({ day: 'numeric', month: 'long' })
 export const ano = fmt({ year: 'numeric' })
-/** "16h", "16h30" — ou null enquanto o horário não está definido */
-export const hora = f.horarioDefinido
-  ? fmt({ hour: '2-digit', minute: '2-digit' }).replace(/:00$/, 'h').replace(':', 'h')
-  : null
+/** "16:00" — ou null enquanto o horário não está definido */
+export const hora = f.horarioDefinido ? fmt({ hour: '2-digit', minute: '2-digit' }) : null
 
 type Phase = 'antes' | 'hoje' | 'depois'
 const dayKey = (d: Date) =>

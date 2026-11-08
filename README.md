@@ -30,7 +30,6 @@ Tudo fica em **`src/config/convite.ts`**. Procure por `TODO`:
 
 | Campo | O que colocar | Enquanto estiver vazio… |
 |---|---|---|
-| `festa.dataHora` + `festa.horarioDefinido` | Troque o `16:00` pelo horário certo e mude `horarioDefinido` para `true` | O convite mostra "A definir"; a agenda vira evento de dia inteiro; a contagem usa 16:00 provisório |
 | `festa.endereco` | Ex.: `'Rua Tal, 123 – Bairro, Cidade-PB'` | Aparece "Endereço completo em breve" |
 | `festa.linkMapa` | Link do Google Maps (no app: Compartilhar → Copiar link) | O botão "Como chegar" não aparece |
 | `rsvp.whatsapp` | Só dígitos, com 55 + DDD: `'5583999999999'` | A confirmação mostra o aviso "WhatsApp ainda não configurado" |
@@ -38,6 +37,8 @@ Tudo fica em **`src/config/convite.ts`**. Procure por `TODO`:
 | `assinatura` | Ex.: `'Com amor, papai e mamãe'` | O rodapé mostra só "Esperamos você!" |
 | `pix` | Troque `null` pelo objeto do exemplo comentado | A seção de presentes não aparece |
 | `site.url` | Endereço publicado, sem barra no final | **A imagem da prévia no WhatsApp não aparece** |
+
+O horário já está definido: `festa.dataHora` é `2027-05-16T16:00:00-03:00` e `horarioDefinido` é `true`. O cartão mostra 16:00 e a agenda (Google e `.ics`) cria o evento das 16:00 às 20:00 (`duracaoHoras: 4`). Se um dia voltar a ser "a definir", basta pôr `horarioDefinido: false`: o convite mostra "A definir" e a agenda vira evento de dia inteiro.
 
 Depois de mudar data, nome ou local, gere de novo a imagem de prévia: `npm run og`.
 
