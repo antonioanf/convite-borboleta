@@ -3,13 +3,13 @@
 Convite de aniversário em formato de site (uma página), feito para ser aberto **no celular** pelo link do WhatsApp.
 Visual "iridescente tech": fundo perolado, gradientes holográficos, cartões em bento e borboletas metalizadas, tudo tirado das fotos do ensaio.
 
-- Abertura com borboleta holográfica: as asas abrem e a tela se dissolve num brilho iridescente
+- Abertura com a borboleta de `originais/borboleta.png`: as asas abrem e o convite aparece em ~0,55 s depois do toque
 - Hero com a foto principal em "cartão holográfico", que inclina com o giroscópio ou o dedo
 - Borboletas 3D/2D que fogem do dedo, pousam na foto e **podem ser pegas** (meta: 10)
 - Raspadinha prateada na data e velinhas para apagar segurando o dedo (ou soprando)
 - Contagem regressiva, local e agenda, galeria com lightbox, confirmação pelo WhatsApp e Pix
 
-**Lighthouse (mobile, build de produção, Lighthouse 13):** Performance 96 · Acessibilidade 100 · Boas práticas 100 · SEO 100.
+**Lighthouse (mobile, build de produção, Lighthouse 13.6):** Performance 88 · Acessibilidade 100 · Boas práticas 100 · SEO 100 (LCP 3,2 s).
 
 ---
 
@@ -40,18 +40,15 @@ Tudo fica em **`src/config/convite.ts`**. Procure por `TODO`:
 
 O horário já está definido: `festa.dataHora` é `2027-05-16T16:00:00-03:00` e `horarioDefinido` é `true`. O cartão mostra 16:00 e a agenda (Google e `.ics`) cria o evento das 16:00 às 20:00 (`duracaoHoras: 4`). Se um dia voltar a ser "a definir", basta pôr `horarioDefinido: false`: o convite mostra "A definir" e a agenda vira evento de dia inteiro.
 
-Depois de mudar data, nome ou local, gere de novo a imagem de prévia: `npm run og`.
+Depois de mudar data, nome ou local, gere de novo a imagem de prévia: `npm run og`. A imagem (`public/og.jpg`, 1200×630) tem a foto principal, "Anna Liz", "4 aninhos" e a data; o quadrado do meio (foto + nome + data + "4") funciona sozinho na miniatura pequena do WhatsApp.
+
+A borboleta da abertura sai de `originais/borboleta.png`: `npm run borboleta` (ou `npm run borboleta -- 400 60` para escolher largura e qualidade). O original atual tem só 294 px; com um de 600 px ou mais ela fica mais nítida em telas 3x.
 
 ## 3. Publicar na Vercel (e atualizar o `site.url`)
 
-1. Crie um repositório **privado** no GitHub e envie o projeto:
-   ```bash
-   git branch -M main
-   git remote add origin https://github.com/SEU-USUARIO/convite-anna-liz.git
-   git push -u origin main
-   ```
-2. Em [vercel.com](https://vercel.com), clique em **Add New → Project**, importe o repositório e clique em **Deploy**. O Vite é detectado sozinho (build `npm run build`, saída `dist`).
-3. Copie o endereço que a Vercel mostrar, ex.: `https://convite-anna-liz.vercel.app`.
+1. O projeto já está no repositório privado `https://github.com/antonioanf/convite-borboleta` (branch `main`). Envie o que estiver só no computador com `git push`.
+2. Em [vercel.com](https://vercel.com), entre com a conta do GitHub, clique em **Add New → Project**, autorize o acesso ao repositório `convite-borboleta` (se ele não aparecer: **Adjust GitHub App Permissions** e marque o repositório) e clique em **Deploy**. O Vite é detectado sozinho (build `npm run build`, saída `dist`).
+3. Copie o endereço que a Vercel mostrar, ex.: `https://convite-borboleta.vercel.app`.
    Para um nome mais bonito: **Settings → Domains** (dá para trocar o subdomínio `.vercel.app`).
 4. No `convite.ts`, coloque esse endereço em `site.url` (sem barra no final).
 5. Rode `npm run og`, faça commit e `git push`. A Vercel publica de novo sozinha em ~1 minuto.
@@ -100,6 +97,7 @@ npm run fotos     # gera public/fotos/<nome>.webp (até 1200 px) e <nome>-600.we
 | `anna-balao3` | Só na galeria |
 
 - Cada foto tem `largura`, `altura` e `foco` (ponto do recorte, CSS `object-position`) no config.
+- Nenhuma foto tem legenda visível; a descrição fica só no `alt`.
 - As fotos atuais vieram com só ~890 px de largura (comprimidas pelo WhatsApp). Quando chegarem as do estúdio em alta, coloque-as em `originais/` com os mesmos nomes e rode `npm run fotos`.
 
 ## 7. Música e sons
@@ -119,7 +117,16 @@ npm run fotos     # gera public/fotos/<nome>.webp (até 1200 px) e <nome>-600.we
 | Raspadinha da data | Raspar ~60% completa sozinha, com brilho e confete. O cartão tem `touch-action: none`: raspar **não rola a página** | Já revelada com reduced-motion; a data está sempre no HTML; botão "Revelar" para teclado |
 | Velinhas | Segurar ~1,3 s (ou Espaço/Enter) apaga; opcional "usar microfone" para soprar | Se negar o microfone, segurar continua funcionando |
 | Contagem | Números que viram, bolinha "ao vivo"; no dia vira "É hoje!" | — |
-| Confirmação | Botão vira check, borboletas + confete, abre o WhatsApp | Aviso se o WhatsApp não estiver configurado |
+| Confirmação ("Você vem?") | Nome e recado opcional (sem número de pessoas); o botão vira check, borboletas + confete e abre o WhatsApp com a mensagem pronta | Aviso se o WhatsApp não estiver configurado |
+
+### O que saiu
+
+- O campo "quantas pessoas" do "Você vem?" (e a linha correspondente na mensagem do WhatsApp).
+- A seção e o botão "Compartilhe o convite".
+- As legendas visíveis das fotos (o texto continua no `alt`, para leitores de tela).
+- O rótulo "Convite · Nº 04" da abertura, do hero e da imagem de prévia.
+- O easter egg de chacoalhar o celular (`lib/shake.ts`, a dica "Psiu…" e o pedido de permissão de movimento). A inclinação da foto principal continua (usa o giroscópio, outro sensor).
+- A borboleta da abertura desenhada em código: agora é a imagem `originais/borboleta.png` (`npm run borboleta`).
 
 ## 9. Testes
 
@@ -152,10 +159,20 @@ npm run perf                              # ou: npm run perf -- http://localhost
 
 Abre o convite no Chromium emulando um Pixel 5 com a **CPU 4x mais lenta** e mede três fases: abertura (carregar + tocar na intro), scroll do convite inteiro com o dedo e interações (toques, rastro de brilho, raspadinha, velinhas). Para cada fase mostra as tarefas longas (> 50 ms), o tempo bloqueado e o FPS médio (mediana das rodadas), e grava o trace de cada rodada em `screenshots/desempenho/` (abre no DevTools → Performance → *Load profile*).
 
+**Antes e depois da rodada de desempenho** (Pixel 5 emulado, CPU 4x mais lenta, mediana de 2 rodadas; "antes" é o commit `7fff1bb`, "depois" é a versão atual):
+
+| Fase | Tarefas longas (antes → depois) | Tempo bloqueado | Maior tarefa | FPS médio | Quadros lentos (> 50 ms) |
+|---|---|---|---|---|---|
+| Abertura | 8,5 → 7 | 956 → 899 ms | 461 → 344 ms | 24,5 → 38,5 | 16 → 8,5 |
+| Scroll do convite | 53,5 → **4** | 315 → **15** ms | 93 → 59 ms | 23,3 → 29,4 | 106,5 → **26** |
+| Interações | 7 → 2,5 | 84 → 97 ms | 105 → 118 ms | 27,3 → 37,5 | 59,5 → 11,5 |
+
+O FPS fica abaixo de 60 porque a CPU está 4x mais lenta de propósito; num celular de verdade a folga é maior.
+
 ## 10. Como funciona por dentro
 
 ```
-index.html                 intro (borboleta holográfica) em HTML/CSS puro: aparece instantaneamente
+index.html                 intro em HTML/CSS puro (borboleta embutida como imagem): aparece instantaneamente
 src/main.ts                entrada pequena: intro + moldura no desktop
 src/config/convite.ts      ← TODO o conteúdo
 src/config/tema.ts         paleta → variáveis CSS (+ tons de texto com contraste AA)
@@ -187,4 +204,4 @@ src/components/
 ### Bibliotecas
 
 Runtime: Vite, React, TypeScript, Tailwind CSS v4, Framer Motion, GSAP + ScrollTrigger, Lenis, React Three Fiber + drei, canvas-confetti (baixado só na primeira comemoração).
-Só para desenvolvimento: Playwright (testes e imagem OG), `@fontsource` (fontes), `sharp` (conversão das fotos).
+Só para desenvolvimento: Playwright (testes e imagem OG), `@fontsource` (fontes), `sharp` (conversão das fotos e da borboleta da abertura).

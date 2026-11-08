@@ -44,12 +44,13 @@ body{width:1200px;height:630px;overflow:hidden;font-family:MR;color:${p.roxo};po
 .foto{position:absolute;left:395px;top:28px;width:410px;height:574px;border-radius:40px;overflow:hidden;
   box-shadow:0 40px 70px -30px ${p.violeta}cc, inset 0 0 0 2px #ffffff88;background:${p.lilas}}
 .foto img{width:100%;height:100%;object-fit:cover;object-position:50% 72%}
-.fade{position:absolute;inset:auto 0 0 0;height:42%;background:linear-gradient(to top, rgb(43 18 84 / .86), rgb(43 18 84 / .5) 50%, transparent)}
-.nome{position:absolute;left:28px;right:20px;bottom:30px;font-size:104px;line-height:.9;color:#fff;letter-spacing:-.02em;text-shadow:0 4px 30px rgb(43 18 84 / .6);white-space:nowrap}
+.fade{position:absolute;inset:auto 0 0 0;height:50%;background:linear-gradient(to top, rgb(43 18 84 / .86), rgb(43 18 84 / .5) 50%, transparent)}
+.nome{position:absolute;left:28px;right:20px;bottom:78px;font-size:104px;line-height:.9;color:#fff;letter-spacing:-.02em;text-shadow:0 4px 30px rgb(43 18 84 / .6);white-space:nowrap}
 .selo{position:absolute;left:712px;top:6px;width:150px;height:150px;border-radius:50%;display:grid;place-items:center;transform:rotate(-8deg);
   background:radial-gradient(circle at 30% 25%, #fff, #ffffffee 60%, ${p.prata});box-shadow:0 18px 34px -14px ${p.violeta}cc;border:3px solid #fff}
 .holo{background:linear-gradient(160deg, ${v['--color-btn-a']}, ${p.magenta} 35%, ${p.violeta} 60%, #4fb3d1 85%);-webkit-background-clip:text;color:transparent}
 .selo .n{font-size:118px;line-height:.75;margin-top:6px}
+.fdata{position:absolute;left:32px;bottom:34px;font-size:30px;font-weight:700;letter-spacing:.12em;color:#fff;text-shadow:0 2px 14px rgb(43 18 84 / .7);white-space:nowrap}
 .esq{position:absolute;left:56px;top:150px;width:310px}
 .dir{position:absolute;left:845px;top:205px;width:320px}
 .k{font-size:17px;color:${v['--color-tinta-2']}}
@@ -61,7 +62,7 @@ body{width:1200px;height:630px;overflow:hidden;font-family:MR;color:${p.roxo};po
 </style></head><body>
 ${bfly(70, 40, 48, -18, 0.95)}${bfly(54, 300, 520, 20, 0.85)}${bfly(64, 1110, 520, 14, 0.9)}
 <div class="esq">
-  <p class="mono k">Convite · Nº ${String(c.idade).padStart(2, '0')}</p>
+  <p class="mono k">Aniversário</p>
   <p class="serif t">Vem voar<br>comigo!</p>
   <p class="s">${c.idade} aninhos</p>
 </div>
@@ -69,6 +70,7 @@ ${bfly(70, 40, 48, -18, 0.95)}${bfly(54, 300, 520, 20, 0.85)}${bfly(64, 1110, 52
   ${fotoData ? `<img src="${fotoData}">` : ''}
   <div class="fade"></div>
   <p class="serif nome">${c.nome}</p>
+  <p class="mono fdata">${dataCurta}</p>
 </div>
 <div class="selo"><span class="serif holo n">${c.idade}</span></div>
 <div class="dir">
