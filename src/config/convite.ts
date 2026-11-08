@@ -123,7 +123,7 @@ const deitada: Foto = {
   alt: 'Anna Liz deitada no chão, sorrindo com as mãos no rosto, de tiara de flores e vestido lilás, com balões lilás ao fundo',
   largura: 890,
   altura: 1600,
-  foco: '50% 34%',
+  foco: '50% 70%',
 }
 const girando: Foto = {
   src: '/fotos/anna-girando.webp',

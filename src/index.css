@@ -505,3 +505,88 @@ html.lite .card-blur {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* ---------- Placeholder de foto ---------- */
+.ph {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(70% 60% at 30% 25%, color-mix(in srgb, var(--color-holo-rosa) 70%, transparent), transparent 70%),
+    radial-gradient(80% 70% at 80% 85%, color-mix(in srgb, var(--color-holo-ciano) 55%, transparent), transparent 70%),
+    linear-gradient(150deg, var(--color-lavanda), var(--color-lilas));
+}
+
+/* ---------- Foto holográfica (hero) ---------- */
+.holo-card {
+  border-radius: inherit;
+  will-change: transform;
+  box-shadow:
+    0 40px 70px -40px color-mix(in srgb, var(--color-violeta) 80%, transparent),
+    0 10px 24px -14px color-mix(in srgb, var(--color-roxo) 30%, transparent);
+}
+.holo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.55);
+  pointer-events: none;
+}
+.holo-sheen {
+  position: absolute;
+  inset: -40%;
+  pointer-events: none;
+  opacity: 0.45;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    115deg,
+    transparent 36%,
+    color-mix(in srgb, var(--color-holo-ciano) 80%, transparent) 44%,
+    rgb(255 255 255 / 0.85) 50%,
+    color-mix(in srgb, var(--color-holo-rosa) 80%, transparent) 56%,
+    color-mix(in srgb, var(--color-lilas) 60%, transparent) 60%,
+    transparent 68%
+  );
+  will-change: transform, opacity;
+}
+/* gradiente que dá leitura ao nome sobre a foto (só na parte de baixo, longe do rosto) */
+.hero-fade {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 34%;
+  pointer-events: none;
+  background: linear-gradient(to top, rgb(43 18 84 / 0.7), rgb(43 18 84 / 0.25) 55%, transparent);
+}
+.hero-name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 30px rgb(43 18 84 / 0.5);
+}
+.hero-name .ch {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* Selo redondo "3 aninhos" */
+.sticker {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #fff, rgb(255 255 255 / 0.86) 60%, var(--color-prata));
+  box-shadow:
+    0 16px 30px -14px color-mix(in srgb, var(--color-violeta) 75%, transparent),
+    inset 0 1px 0 #fff;
+}
+.sticker-spin {
+  animation: sticker 18s linear infinite;
+}
+@keyframes sticker {
+  to {
+    transform: rotate(360deg);
+  }
+}

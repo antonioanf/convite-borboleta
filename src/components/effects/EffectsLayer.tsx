@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { field, type Butterfly } from '../../lib/butterflyField'
 import { WING, WINGSPAN_UNITS, wingCanvas } from '../../lib/wingArt'
 import { tilt, updateTilt } from '../../lib/tilt'
+import { updateHolo } from '../../lib/holo'
 import { perf } from '../../lib/perf'
 import { convite } from '../../config/convite'
 
@@ -83,7 +84,7 @@ export function EffectsLayer() {
     let W = 0
     let H = 0
     let dust: Dust[] = []
-    const aurora = document.querySelector<HTMLElement>('.aurora')
+    const mesh = document.querySelector<HTMLElement>('.mesh')
 
     const makeDust = () => {
       const n = reduced ? 10 : perf.isLite() ? 16 : 34
@@ -122,12 +123,13 @@ export function EffectsLayer() {
       last = nowMs
       const t = nowMs / 1000
       updateTilt(dt)
+      updateHolo()
       field.step(dt)
 
       // parallax do fundo pela inclinação do aparelho
       const ox = tilt.x * 14
       const oy = tilt.y * 14
-      if (aurora) aurora.style.transform = `translate3d(${-ox * 1.4}px, ${-oy * 1.4}px, 0)`
+      if (mesh) mesh.style.transform = `translate3d(${-ox * 1.4}px, ${-oy * 1.4}px, 0)`
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, W, H)

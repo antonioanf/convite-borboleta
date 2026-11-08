@@ -1,10 +1,11 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { convite } from '../config/convite'
 import { useLite, useOpened } from '../hooks/useStores'
-import { Aurora } from '../components/effects/Aurora'
+import { Mesh } from '../components/effects/Mesh'
 import { EffectsLayer } from '../components/effects/EffectsLayer'
 import { BottomBar } from '../components/ui/BottomBar'
 import { Hero } from '../components/sections/Hero'
+import { Destaque } from '../components/sections/Destaque'
 import { Countdown } from '../components/sections/Countdown'
 import { Details } from '../components/sections/Details'
 import { Gallery } from '../components/sections/Gallery'
@@ -48,11 +49,13 @@ export function App() {
         gsap.utils.toArray<HTMLElement>('.reveal').forEach((el) => {
           gsap.fromTo(
             el,
-            { opacity: 0, y: 60, scale: 0.94 },
+            { opacity: 0, y: 48, scale: 0.94, filter: 'blur(10px)' },
             {
               opacity: 1,
               y: 0,
               scale: 1,
+              filter: 'blur(0px)',
+              clearProps: 'filter',
               duration: 1.1,
               ease: 'expo.out',
               scrollTrigger: { trigger: el, start: 'top 90%', once: true },
@@ -72,9 +75,10 @@ export function App() {
 
   return (
     <>
-      <Aurora />
+      <Mesh />
       <main className="page" aria-hidden={!opened}>
         <Hero />
+        <Destaque />
         {s.contagem && <Countdown />}
         {s.local && <Details />}
         {s.galeria && <Gallery />}
