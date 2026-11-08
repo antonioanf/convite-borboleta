@@ -69,6 +69,41 @@ const diaSeguinte = new Date(Date.parse(dia) + 86_400_000).toISOString().slice(0
   const txt = await page.locator('#local .scratch').innerText()
   check('data presente no texto (leitores de tela)', /2027/.test(txt), txt.split('\n')[0])
 }
+// 2a) raspar com o DEDO (eventos de toque reais) não rola a página; fora do cartão, rola
+{
+  const page = await newPage('?abrir=1&teste=1')
+  await page.waitForTimeout(1500)
+  await scrollTo(page, 'local')
+  await page.waitForTimeout(1500)
+  const cdp = await page.context().newCDPSession(page)
+  // arrasto vertical com o dedo (eventos de toque reais, que rolam a página quando permitido)
+  const drag = async (x, y0, y1) => {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: y0 }] })
+    for (let i = 1; i <= 15; i++) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y0 + ((y1 - y0) * i) / 15 }] })
+      await page.waitForTimeout(16)
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await page.waitForTimeout(700)
+  }
+  const box = await page.locator('#local .scratch canvas').boundingBox()
+  const y0 = await page.evaluate(() => window.scrollY)
+  await drag(box.x + box.width / 2, box.y + box.height - 10, box.y + 10) // arrasta para cima, dentro da raspadinha
+  const y1 = await page.evaluate(() => window.scrollY)
+  const raspou = await page.evaluate(() => {
+    const c = document.querySelector('#local .scratch canvas')
+    if (!c) return true
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data
+    for (let i = 3; i < d.length; i += 4) if (d[i] < 40) return true
+    return false
+  })
+  check('raspar com o dedo não rola a página (touch-action: none)', y1 === y0 && raspou, `scrollY ${y0} → ${y1}`)
+  // controle: o mesmo gesto fora da raspadinha rola normalmente
+  const card = await page.locator('#local .card').nth(3).boundingBox()
+  await drag(card.x + card.width / 2, card.y + card.height - 20, card.y + 20)
+  const y2 = await page.evaluate(() => window.scrollY)
+  check('controle: o mesmo gesto fora da raspadinha rola a página', y2 > y1 + 50, `scrollY ${y1} → ${y2}`)
+}
 // 2b) reduced motion: data já aparece revelada
 {
   const page = await newPage('?abrir=1', { reducedMotion: 'reduce' })

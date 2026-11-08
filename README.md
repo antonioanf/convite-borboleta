@@ -1,13 +1,15 @@
-# 🦋 Convite Borboleta — convite digital de aniversário
+# 🦋 Convite Borboleta — Anna Liz · 4 aninhos
 
-Convite infantil em formato de site (uma página), tema borboletas e paleta roxa, feito para ser aberto **no celular** pelo link do WhatsApp.
+Convite de aniversário em formato de site (uma página), feito para ser aberto **no celular** pelo link do WhatsApp.
+Visual "iridescente tech": fundo perolado, gradientes holográficos, cartões em bento e borboletas metalizadas, tudo tirado das fotos do ensaio.
 
-- Intro com casulo que racha e solta uma revoada de borboletas
-- Borboletas 3D que fogem do dedo, pousam na foto e no nome e reagem à inclinação do celular
-- Modo leve automático (borboletas 2D) para aparelhos simples
-- Contagem regressiva com cartões que viram, local com mapa e agenda, galeria com lightbox, confirmação pelo WhatsApp, Pix e compartilhar
+- Abertura com borboleta holográfica: as asas abrem e a tela se dissolve num brilho iridescente
+- Hero com a foto principal em "cartão holográfico", que inclina com o giroscópio ou o dedo
+- Borboletas 3D/2D que fogem do dedo, pousam na foto e **podem ser pegas** (meta: 10)
+- Raspadinha prateada na data, velinhas para apagar segurando o dedo (ou soprando), chacoalhar o celular solta uma revoada
+- Contagem regressiva, local e agenda, galeria com lightbox, confirmação pelo WhatsApp, Pix e compartilhar
 
-**Resultado do Lighthouse (mobile, build de produção):** Performance 97 · Acessibilidade 100 · Boas práticas 100 · SEO 100.
+**Lighthouse (mobile, build de produção, Lighthouse 13):** Performance 96 · Acessibilidade 100 · Boas práticas 100 · SEO 100.
 
 ---
 
@@ -22,158 +24,153 @@ npm run build          # gera a pasta dist/ para publicar
 npm run preview        # testa o build em http://localhost:4173
 ```
 
-## 2. Personalizar para um cliente (só um arquivo)
+## 2. O que falta preencher (TODOs)
 
-Todo o conteúdo fica em **`src/config/convite.ts`**. O arquivo é tipado, então o editor avisa se faltar algo.
+Tudo fica em **`src/config/convite.ts`**. Procure por `TODO`:
 
-| Campo | O que é |
+| Campo | O que colocar | Enquanto estiver vazio… |
+|---|---|---|
+| `festa.dataHora` + `festa.horarioDefinido` | Troque o `16:00` pelo horário certo e mude `horarioDefinido` para `true` | O convite mostra "A definir"; a agenda vira evento de dia inteiro; a contagem usa 16:00 provisório |
+| `festa.endereco` | Ex.: `'Rua Tal, 123 – Bairro, Cidade-PB'` | Aparece "Endereço completo em breve" |
+| `festa.linkMapa` | Link do Google Maps (no app: Compartilhar → Copiar link) | O botão "Como chegar" não aparece |
+| `rsvp.whatsapp` | Só dígitos, com 55 + DDD: `'5583999999999'` | A confirmação mostra o aviso "WhatsApp ainda não configurado" |
+| `rsvp.prazo` | Data limite: `'2027-05-01'` | Some a frase "Confirme até…" |
+| `assinatura` | Ex.: `'Com amor, papai e mamãe'` | O rodapé mostra só "Esperamos você!" |
+| `pix` | Troque `null` pelo objeto do exemplo comentado | A seção de presentes não aparece |
+| `site.url` | Endereço publicado, sem barra no final | **A imagem da prévia no WhatsApp não aparece** |
+
+Depois de mudar data, nome ou local, gere de novo a imagem de prévia: `npm run og`.
+
+## 3. Publicar na Vercel (e atualizar o `site.url`)
+
+1. Crie um repositório **privado** no GitHub e envie o projeto:
+   ```bash
+   git branch -M main
+   git remote add origin https://github.com/SEU-USUARIO/convite-anna-liz.git
+   git push -u origin main
+   ```
+2. Em [vercel.com](https://vercel.com), clique em **Add New → Project**, importe o repositório e clique em **Deploy**. O Vite é detectado sozinho (build `npm run build`, saída `dist`).
+3. Copie o endereço que a Vercel mostrar, ex.: `https://convite-anna-liz.vercel.app`.
+   Para um nome mais bonito: **Settings → Domains** (dá para trocar o subdomínio `.vercel.app`).
+4. No `convite.ts`, coloque esse endereço em `site.url` (sem barra no final).
+5. Rode `npm run og`, faça commit e `git push`. A Vercel publica de novo sozinha em ~1 minuto.
+6. Teste a prévia colando o link num chat do WhatsApp. Se a imagem antiga ainda aparecer (cache do WhatsApp), envie com `?v=2` no final.
+
+Sem GitHub: `npx vercel` dentro da pasta (e `npx vercel --prod` para publicar a versão final).
+
+## 4. Paleta (tirada das fotos)
+
+Fica em `convite.paleta`. Os tons de **texto** são calculados em `src/config/tema.ts` (misturas com o roxo profundo) para passar no contraste AA.
+
+| Nome no config | Cor | De onde vem |
+|---|---|---|
+| `perola` | `#F6F2FA` | parede clara do estúdio (fundo) |
+| `lavanda` | `#E4D4F7` | balões claros |
+| `lilas` | `#C3A3EE` | vestido / balões médios |
+| `violeta` | `#8B5CF6` | balões mais fortes |
+| `roxo` | `#3B1C6E` | sombras dos balões — **texto principal** |
+| `rosa` | `#F48FB8` | glacê do bolo |
+| `magenta` | `#E0428A` | borboleta rosa / número do bolo (acento) |
+| `prata`, `holoCiano`, `holoRosa` | `#E9E6F2`, `#A5F3FC`, `#F9A8D4` | balões metalizados (gradiente holográfico) |
+
+## 5. Tipografia
+
+Servidas pelo próprio site (`public/fonts/`, vindas do `@fontsource`), com `preload` e `font-display: swap`:
+
+- **Instrument Serif** (itálico): nome e títulos
+- **Manrope** (variável 200–800): textos
+- **JetBrains Mono** (variável): números, data, contagem e rótulos em caixa alta
+
+> Nos screenshots do **WebKit do Playwright no Windows**, a Manrope aparece toda fina: esse WebKit de teste não aplica pesos de fontes variáveis. No Chrome e no Safari de verdade (iPhone) os pesos aparecem certos.
+
+## 6. Fotos
+
+As originais ficam em `originais/` e são convertidas para WebP com:
+
+```bash
+npm run fotos     # gera public/fotos/<nome>.webp (até 1200 px) e <nome>-600.webp
+```
+
+| Arquivo | Onde aparece |
 |---|---|
-| `crianca.nome`, `idade`, `frase` | Nome (fonte script com brilho), idade e frase curta |
-| `festa.dataHora` | Formato ISO **com fuso**: `"2026-12-12T16:00:00-03:00"` |
-| `festa.duracaoHoras` | Usada na agenda e para saber quando a festa acabou |
-| `festa.fusoHorario` | Ex.: `America/Sao_Paulo`, `America/Fortaleza`, `America/Manaus` |
-| `festa.local`, `endereco`, `linkMapa` | Local e link do Google Maps (botão "Como chegar") |
-| `rsvp.whatsapp` | **Só dígitos**, com DDI e DDD: `5583999999999` |
-| `rsvp.prazo` | Data limite para confirmar: `"2026-12-05"` |
-| `rsvp.maxPessoas` | Máximo de pessoas por confirmação |
-| `assinatura` | Texto do rodapé, ex.: "Com amor, papai e mamãe" |
-| `fotoPrincipal`, `galeria` | Fotos (veja a seção 3). Sem `src`, aparece um placeholder bonito |
-| `musica` | Caminho do mp3, ou `null` para não ter música |
-| `pix` | Chave, tipo, titular e mensagem, ou `null` para esconder |
-| `paleta` | As 7 cores do tema (troque o roxo por rosa, azul etc.) |
-| `secoes` | Liga/desliga: `contagem`, `local`, `galeria`, `rsvp`, `pix`, `compartilhar` |
-| `site.url` | Endereço final publicado (necessário para a prévia no WhatsApp) |
-| `site.titulo`, `descricao` | Título e descrição que aparecem na prévia do link |
+| `anna-deitada` | **Hero** (foto principal) e galeria |
+| `anna-girando` | Cartão largo da idade (formato original, sem recorte) e galeria |
+| `anna-bolo` | Seção "Sopre as velinhas" e galeria |
+| `anna-balao3` | Só na galeria |
 
-Depois de editar o config, gere de novo a imagem de prévia e o ícone:
+- Cada foto tem `largura`, `altura` e `foco` (ponto do recorte, CSS `object-position`) no config.
+- As fotos atuais vieram com só ~890 px de largura (comprimidas pelo WhatsApp). Quando chegarem as do estúdio em alta, coloque-as em `originais/` com os mesmos nomes e rode `npm run fotos`.
 
-```bash
-npm run og     # cria public/og.jpg (1200x630) e public/apple-touch-icon.png
-```
+## 7. Música e sons
 
-## 3. Fotos
+- `musica: '/musica/caixinha-de-musica.mp3'` (ou `null` para não ter música nem efeitos sonoros).
+- A música só começa depois do toque de abertura, com fade-in.
+- Os efeitos (brilho, sininho, "pop") são gerados por código (Web Audio) e respeitam o botão de mudo.
 
-Coloque as fotos em `public/fotos/` e aponte no config:
+## 8. Interações
 
-```ts
-fotoPrincipal: { src: '/fotos/principal.webp', alt: 'Sofia sorrindo no jardim' },
-galeria: [
-  { src: '/fotos/ensaio-1.webp', srcPequena: '/fotos/ensaio-1-600.webp', alt: 'Sofia entre flores' },
-  // ...
-],
-```
+| Interação | Como funciona | Fallback |
+|---|---|---|
+| Rastro de brilho | Arrastar o dedo deixa estrelinhas (~0,6 s) | Máx. 120 partículas (60 no modo leve) |
+| Toque solta borboletas | Toque rápido numa área vazia → 2–3 borboletas + vibração | — |
+| Pegue as borboletas | Tocar numa borboleta → brilho + contador `n/10`; outra entra em 2–4 s; aos 10, mensagem surpresa | Funciona no 2D e no 3D |
+| Foto holográfica | Inclina até 8° com o giroscópio (ou o dedo/mouse) | Parada com reduced-motion |
+| Raspadinha da data | Raspar ~60% completa sozinha, com brilho e confete. O cartão tem `touch-action: none`: raspar **não rola a página** | Já revelada com reduced-motion; a data está sempre no HTML; botão "Revelar" para teclado |
+| Velinhas | Segurar ~1,3 s (ou Espaço/Enter) apaga; opcional "usar microfone" para soprar | Se negar o microfone, segurar continua funcionando |
+| Chacoalhar | Revoada de borboletas (permissão de movimento pedida no toque de abertura no iOS) | Sem sensor: nada acontece |
+| Contagem | Números que viram, bolinha "ao vivo"; no dia vira "É hoje!" | — |
+| Confirmação | Botão vira check, borboletas + confete, abre o WhatsApp | Aviso se o WhatsApp não estiver configurado |
 
-- O `alt` é obrigatório: é o que leitores de tela leem.
-- O `srcPequena` é opcional: uma versão de 600 px que o carrossel usa (mais leve).
-- O formato do carrossel é 4:5 (retrato). Fotos em outro formato são recortadas no centro.
+## 9. Testes
 
-### Como comprimir as fotos do estúdio (meta: 150–300 KB cada)
-
-Fotos de estúdio costumam vir com 5–15 MB. É preciso reduzir antes de publicar.
-
-**Opção fácil (no navegador):** [squoosh.app](https://squoosh.app)
-1. Arraste a foto.
-2. Em *Resize*, use largura **1200 px** (principal e galeria). Para o `srcPequena`, use **600 px**.
-3. Em *Compress*, escolha **WebP**, qualidade **72–80**. Ou **AVIF**, qualidade **50–60**, que gera arquivos ainda menores.
-4. Confira se o tamanho ficou entre 150 e 300 KB e baixe.
-
-**Opção em lote (terminal):**
-```bash
-npx sharp-cli -i "originais/*.jpg" -o public/fotos/ -f webp -q 76 resize 1200
-npx sharp-cli -i "originais/*.jpg" -o public/fotos/pequenas/ -f webp -q 72 resize 600
-```
-
-## 4. Música
-
-Coloque o mp3 em `public/musica/` e ajuste `musica: '/musica/minha-musica.mp3'`.
-
-- A música só começa depois do toque de abertura (regra de todos os navegadores), com fade-in.
-- Prefira 64–96 kbps em mono: uma música de 1 minuto fica com uns 500 KB.
-- O arquivo de exemplo, `caixinha-de-musica.mp3`, é uma melodia original gerada por código, livre para usar.
-- Use só músicas que você tem direito de usar.
-
-## 5. Testar no celular pela rede local
-
-```bash
-npm run dev -- --host
-```
-
-O terminal mostra um endereço `Network: http://192.168.x.x:5173`. Abra esse endereço no celular conectado ao **mesmo Wi-Fi**.
-
-Algumas coisas só funcionam com HTTPS (o link publicado): inclinação no iPhone, copiar com a API moderna e compartilhar. Sem HTTPS, os fallbacks entram e nada quebra.
-
-### Parâmetros de teste na URL
+### Parâmetros na URL
 
 | Parâmetro | Efeito |
 |---|---|
-| `?modo=leve` | Força as borboletas 2D (modo de aparelho simples) |
-| `?modo=3d` | Força as borboletas 3D |
-| `?agora=2026-12-12T10:00` | Simula a data/hora atual: testa "É hoje! 🦋" e o agradecimento (`2026-12-13T10:00`) |
+| `?modo=leve` / `?modo=3d` | Força as borboletas 2D / 3D |
+| `?agora=2027-05-16T10:00` | Simula a data/hora atual ("É hoje!"; `2027-05-17T10:00` mostra o agradecimento) |
 | `?abrir=1` | Pula a intro |
+| `?teste=1` | Expõe `window.__convite` para os testes automáticos |
 
-### Testes automáticos (Playwright)
+### Automáticos (Playwright)
 
 ```bash
 npx playwright install chromium webkit   # só na primeira vez
 npm run dev                               # em outro terminal
-npm run shots -- --video                  # screenshots + vídeo: iPhone 13, Pixel 5, 360x740, 430x932
-npm run testes                            # lightbox, RSVP, Pix, .ics, "É hoje", moldura desktop
+npm run shots -- --video                  # screenshots: iPhone 13, Pixel 5, 360x740, 430x932
+npm run testes                            # 24 testes de interação
 ```
 
-Os resultados ficam em `screenshots/`. O script também avisa se aparecer scroll horizontal ou erro no console.
+`npm run testes` cobre: intro, raspadinha (inclusive que raspar com o dedo não rola a página), velinhas (toque curto não apaga, segurar apaga), pegar 10 borboletas nos modos leve e 3D, chacoalhar, toque que solta borboletas, lightbox, RSVP, Pix, `.ics` e os estados da contagem. Os resultados ficam em `screenshots/`.
 
-## 6. Publicar
-
-### Vercel
-1. Suba a pasta para um repositório no GitHub.
-2. Em [vercel.com](https://vercel.com), clique em *Add New → Project* e importe o repositório. O Vite é detectado sozinho (build `npm run build`, saída `dist`).
-3. Copie o endereço final (ex.: `https://convite-sofia.vercel.app`), coloque em `site.url` no config e publique de novo.
-
-Sem GitHub: `npx vercel` dentro da pasta.
-
-### Netlify
-- Arrastar e soltar: rode `npm run build` e arraste a pasta `dist/` em [app.netlify.com/drop](https://app.netlify.com/drop).
-- Ou conecte o repositório com build `npm run build` e pasta `dist`.
-
-### Prévia do link no WhatsApp
-- A prévia usa `site.url` + `og.jpg`. **O `site.url` precisa ser o endereço publicado**, senão a imagem não aparece.
-- O WhatsApp guarda a prévia em cache. Se mudar a imagem, envie o link com `?v=2` no final.
-
-## 7. Como funciona por dentro
+## 10. Como funciona por dentro
 
 ```
-index.html                 intro (casulo) em HTML/CSS puro: aparece instantaneamente
-src/main.ts                entrada pequena (~5 KB): intro + moldura no desktop
+index.html                 intro (borboleta holográfica) em HTML/CSS puro: aparece instantaneamente
+src/main.ts                entrada pequena: intro + moldura no desktop
 src/config/convite.ts      ← TODO o conteúdo
+src/config/tema.ts         paleta → variáveis CSS (+ tons de texto com contraste AA)
 src/lib/
-  butterflyField.ts        simulação das borboletas (voo curvo, fuga do dedo, pouso, rastro)
-  wingArt.ts               textura da asa desenhada por código (a mesma no 3D e no 2D)
-  perf.ts                  decide 3D x modo leve
-  audio.ts                 música com fade (Web Audio, funciona no iOS)
-  tilt.ts                  inclinação do celular (com permissão no iOS)
-  scroll.ts                Lenis + GSAP ScrollTrigger no mesmo relógio
-  calendar.ts              Google Agenda + arquivo .ics
-  share.ts, haptics.ts     compartilhar/copiar e vibração, com fallbacks
+  butterflyField.ts        simulação das borboletas (voo, fuga do dedo, pouso, captura, revoadas)
+  wingArt.ts               textura metalizada da asa (a mesma no 3D e no 2D)
+  holo.ts                  ângulo do brilho holográfico (inclinação + scroll)
+  sfx.ts, shake.ts         efeitos sonoros e "chacoalhar"
+  celebrate.ts             confete + borboletas
+  datas.ts, calendar.ts    datas formatadas, Google Agenda e .ics (dia inteiro se o horário não estiver definido)
 src/components/
-  effects/                 Aurora, EffectsLayer (canvas 2D), Butterflies3D (R3F, lazy)
-  sections/                Hero, Countdown, Details, Gallery, Lightbox, Rsvp, Pix, Footer
-  ui/                      GlassCard, Press (botões), MusicButton, BottomBar, Photo...
+  effects/                 Mesh (fundo), EffectsLayer (canvas 2D), Butterflies3D (R3F, lazy)
+  sections/                Hero, Destaque, Countdown, Details, Gallery, Lightbox, Velinhas, Rsvp, Pix, Footer
+  fun/                     Scratch, Candles, CatchCounter, ProgressBar
+  ui/                      Card, HoloPhoto, Press, Icons, Cake, Photo, BottomBar, MusicButton...
 ```
 
-- **Uma simulação e dois desenhos:** `butterflyField.ts` calcula onde cada borboleta está. A cena 3D e o canvas 2D só desenham, então trocar de modo no meio da visita é suave.
-- **Pouso:** qualquer elemento com `data-perch="fx,fy,ângulo;..."` vira lugar de pouso (frações da largura/altura). Hoje são a moldura da foto e o nome.
-- **Modo leve automático:** liga quando o aparelho tem `hardwareConcurrency ≤ 4` ou `deviceMemory ≤ 4`, quando não há WebGL, quando o FPS fica abaixo de 45 nos primeiros 2 s da cena 3D, ou com economia de dados. Com `prefers-reduced-motion`, as animações caem para o mínimo.
-- **Carregamento:** o app React é pré-baixado em segundo plano e só executado no toque de abertura. A animação do casulo cobre esse tempo. A cena 3D (three.js) é outro arquivo, baixado só depois da intro e só se o aparelho aguentar.
-- **Desktop:** o próprio convite aparece num `<iframe>` dentro de uma moldura de celular. Não existe layout desktop separado.
-- **Desempenho:** DPR máximo 1,5, a cena 3D pausa com a aba em segundo plano e as animações CSS pausam fora da tela. No máximo 3 elementos usam `backdrop-filter` (botão de música, contagem e RSVP, que nunca aparecem juntos), e as animações contínuas usam só `transform`/`opacity`.
+- **Uma simulação e dois desenhos:** `butterflyField.ts` calcula as borboletas; a cena 3D e o canvas 2D só desenham.
+- **Pouso:** elementos com `data-perch="fx,fy,ângulo;..."` viram lugar de pouso (hoje, a moldura da foto principal).
+- **Modo leve automático:** com `hardwareConcurrency ≤ 4`, `deviceMemory ≤ 4`, sem WebGL, FPS < 45 na cena 3D ou economia de dados.
+- **Desempenho:** DPR máximo 1,5; 3D só depois da intro; animações contínuas só com `transform`/`opacity`; o canvas 2D descansa quando não há nada para desenhar; no máximo 3 elementos com `backdrop-filter` (pill inferior, contagem e confirmação).
+- **Desktop:** o próprio convite aparece num `<iframe>` dentro de uma moldura de celular.
 
 ### Bibliotecas
 
-Obrigatórias: Vite, React, TypeScript, Tailwind CSS v4, Framer Motion, GSAP + ScrollTrigger, Lenis, React Three Fiber + drei, canvas-confetti.
-
-- **drei** é usado no `PerformanceMonitor`: baixa a resolução da cena 3D se o desempenho cair durante o uso.
-- **canvas-confetti** só é baixado quando alguém confirma presença.
-
-Únicos extras, só para desenvolvimento (não vão para o site):
-- **Playwright**: testes visuais em iPhone/Android e geração da imagem `og.jpg`.
-- **@fontsource** (Great Vibes e Outfit): fontes servidas pelo próprio site, sem depender do Google Fonts. Ficam em `public/fonts/` com `font-display: swap` e preload.
+Runtime: Vite, React, TypeScript, Tailwind CSS v4, Framer Motion, GSAP + ScrollTrigger, Lenis, React Three Fiber + drei, canvas-confetti (baixado só na primeira comemoração).
+Só para desenvolvimento: Playwright (testes e imagem OG), `@fontsource` (fontes), `sharp` (conversão das fotos).
