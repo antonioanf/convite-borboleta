@@ -6,6 +6,7 @@ import { Photo } from '../ui/Photo'
 import { scroll } from '../../lib/scroll'
 import { butterflyBurst } from '../../lib/butterflySvg'
 import { vibrate } from '../../lib/haptics'
+import { Icon } from '../ui/Icons'
 
 /**
  * Lightbox em tela cheia:
@@ -67,7 +68,7 @@ function Viewer({ fotos, start, onClose }: { fotos: Foto[]; start: number; onClo
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <motion.div className="absolute inset-0 bg-[#0b0414]/95" style={{ opacity: bgOpacity }} />
+      <motion.div className="absolute inset-0 bg-[#1e0c3c]/95" style={{ opacity: bgOpacity }} />
       <motion.div
         className="absolute inset-0"
         drag="y"
@@ -95,8 +96,12 @@ function Viewer({ fotos, start, onClose }: { fotos: Foto[]; start: number; onClo
           className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {fotos.map((f, i) => (
-            <div key={i} className="relative flex h-full w-full shrink-0 snap-center items-center justify-center px-3">
-              <div className="relative aspect-[4/5] w-full max-w-[460px] overflow-hidden rounded-[28px] shadow-[0_30px_80px_-20px_rgba(124,58,237,.7)]">
+            <div key={i} className="relative flex h-full w-full shrink-0 snap-center items-center justify-center px-3 py-20">
+              {/* foto inteira, no formato original (sem recorte) */}
+              <div
+                className="relative max-w-[460px] overflow-hidden rounded-[24px] shadow-[0_30px_80px_-24px_rgba(139,92,246,.8)]"
+                style={{ aspectRatio: `${f.largura ?? 4} / ${f.altura ?? 5}`, width: `min(100%, calc((100dvh - 160px) * ${(f.largura ?? 4) / (f.altura ?? 5)}))` }}
+              >
                 <Photo foto={f} sizes="100vw" eager={Math.abs(i - start) <= 1} />
               </div>
             </div>
@@ -105,7 +110,7 @@ function Viewer({ fotos, start, onClose }: { fotos: Foto[]; start: number; onClo
       </motion.div>
 
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-[max(14px,env(safe-area-inset-top))]">
-        <span className="rounded-full bg-white/10 px-4 py-2 text-[16px] tabular-nums text-white" aria-live="polite">
+        <span className="mono rounded-full bg-white/15 px-4 py-2 text-[15px] text-white" aria-live="polite">
           {cur + 1} / {fotos.length}
         </span>
         <button
@@ -113,15 +118,14 @@ function Viewer({ fotos, start, onClose }: { fotos: Foto[]; start: number; onClo
           type="button"
           onClick={onClose}
           aria-label="Fechar fotos"
-          className="pointer-events-auto grid h-12 w-12 place-items-center rounded-full bg-white/15 text-white active:scale-90"
+          className="pointer-events-auto grid h-12 w-12 place-items-center rounded-full bg-white/90 text-roxo shadow-lg transition-transform active:scale-90"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-            <path d="M6 6l12 12M18 6L6 18" />
-          </svg>
+          <Icon name="fechar" size={22} />
         </button>
       </div>
-      <p className="pointer-events-none absolute inset-x-0 bottom-0 pb-[max(20px,env(safe-area-inset-bottom))] text-center text-[15px] text-white/70">
-        {fotos[cur]?.alt} · puxe para baixo para fechar
+      <p className="pointer-events-none absolute inset-x-0 bottom-0 px-6 pb-[max(20px,env(safe-area-inset-bottom))] text-center text-[14px] leading-snug text-white/85">
+        {fotos[cur]?.alt}
+        <span className="mono mt-1 block text-[11px] uppercase tracking-[0.2em] text-white/75">puxe para baixo para fechar</span>
       </p>
     </motion.div>
   )

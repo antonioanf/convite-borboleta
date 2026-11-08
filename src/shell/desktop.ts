@@ -1,26 +1,29 @@
 /**
  * Desktop: mostra o próprio convite (versão mobile) dentro de uma moldura de celular,
- * com o fundo aurora ao redor. Não existe layout desktop separado.
+ * com o fundo perolado ao redor. Não existe layout desktop separado.
  */
 import { convite } from '../config/convite'
+import { dataCurta } from '../lib/datas'
 
 export function mountDesktop() {
   document.getElementById('intro')?.remove()
   const root = document.getElementById('root')!
   const src = new URL(location.href)
+  const c = convite.crianca
   root.innerHTML = `
-    <div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="mesh" aria-hidden="true"><div class="mesh-inner"><i></i><i></i><i></i><i></i></div></div>
     <div class="grain" aria-hidden="true"></div>
     <main class="desk-shell">
       <div class="desk-side" style="text-align:right">
-        <p style="font-family:var(--font-script);font-size:64px;line-height:1" class="shimmer">${convite.crianca.nome}</p>
-        <p style="margin-top:12px;font-size:18px;color:var(--color-lilas)">vai completar ${convite.crianca.idade} aninhos 🦋</p>
+        <p class="label">${dataCurta}</p>
+        <p class="serif" style="margin-top:10px;font-size:72px;line-height:.95;color:var(--color-roxo)">${c.nome}</p>
+        <p style="margin-top:12px;font-size:18px;font-weight:600;color:var(--color-tinta-2)">vai fazer ${c.idade} aninhos 🦋</p>
       </div>
-      <div class="desk-phone"><iframe title="Convite de ${convite.crianca.nome}" src="${src.href}"
-        allow="autoplay; clipboard-write; web-share; accelerometer; gyroscope; vibrate"></iframe></div>
-      <div class="desk-side" style="color:rgb(255 255 255 / .75);font-size:16px">
-        <p>Este convite foi feito para o <strong style="color:#fff">celular</strong>.</p>
-        <p style="margin-top:8px">Abra o link no seu WhatsApp para a experiência completa — toque nas borboletas! ✨</p>
+      <div class="desk-phone"><iframe title="Convite de ${c.nome}" src="${src.href}"
+        allow="autoplay; clipboard-write; web-share; accelerometer; gyroscope; vibrate; microphone"></iframe></div>
+      <div class="desk-side" style="color:var(--color-tinta-2);font-size:16px;font-weight:500;line-height:1.6">
+        <p class="label">Feito para o celular</p>
+        <p style="margin-top:10px">Abra o link no WhatsApp para a experiência completa: toque nas borboletas, raspe a data e apague as velinhas ✨</p>
       </div>
     </main>`
   const phone = root.querySelector<HTMLElement>('.desk-phone')!

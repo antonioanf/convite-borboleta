@@ -3,23 +3,16 @@ import { motion } from 'framer-motion'
 import { convite } from '../../config/convite'
 import { useNow } from '../../hooks/useStores'
 import { useOffscreenPause } from '../../hooks/useOffscreenPause'
-import { eventTimes } from '../../lib/calendar'
-import { GlassCard } from '../ui/GlassCard'
+import { Card } from '../ui/Card'
 import { SectionTitle } from '../ui/SectionTitle'
 import { ButterflyIcon } from '../ui/ButterflyIcon'
 import { field } from '../../lib/butterflyField'
+import { hora, partyPhase } from '../../lib/datas'
+import { indice } from '../../lib/secoes'
+import { useHolo } from '../../lib/holo'
+import { perf } from '../../lib/perf'
 
-type Phase = 'antes' | 'hoje' | 'depois'
-
-const dayKey = (d: Date) =>
-  new Intl.DateTimeFormat('en-CA', { timeZone: convite.festa.fusoHorario, year: 'numeric', month: '2-digit', day: '2-digit' }).format(d)
-
-export function partyPhase(nowMs: number): Phase {
-  const { start, end } = eventTimes(convite)
-  if (nowMs >= end.getTime()) return 'depois'
-  if (dayKey(new Date(nowMs)) === dayKey(start)) return 'hoje'
-  return nowMs < start.getTime() ? 'antes' : 'hoje'
-}
+export { partyPhase }
 
 /** Cartão que vira (flip) quando o valor muda. */
 function Flip({ value }: { value: string }) {
@@ -47,22 +40,24 @@ function Flip({ value }: { value: string }) {
   )
 }
 
-function Unit({ value, label }: { value: number; label: string }) {
+function Unit({ value, label, digits = 2 }: { value: number; label: string; digits?: number }) {
   return (
-    <div className="flex flex-1 flex-col items-center gap-2">
-      <Flip value={String(value).padStart(2, '0')} />
-      <span className="text-[13px] font-medium uppercase tracking-[0.14em] text-lilas">{label}</span>
+    <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
+      <Flip value={String(value).padStart(digits, '0')} />
+      <span className="label !text-[11px] !tracking-[0.16em]">{label}</span>
     </div>
   )
 }
 
 function Today() {
   const ref = useRef<HTMLDivElement>(null)
+  const title = useRef<HTMLParagraphElement>(null)
+  useHolo(title)
   // efeito especial: revoadas periódicas de borboletas saindo do título
   useEffect(() => {
     const fire = () => {
       const r = ref.current?.getBoundingClientRect()
-      if (r && r.top < innerHeight && r.bottom > 0) field.burst(r.left + r.width / 2, r.top + r.height / 2, 4)
+      if (r && r.top < innerHeight && r.bottom > 0) field.burst(r.left + r.width / 2, r.top + r.height / 3, perf.isLite() ? 2 : 4)
     }
     const id = setInterval(fire, 4500)
     const first = setTimeout(fire, 600)
@@ -71,27 +66,32 @@ function Today() {
       clearTimeout(first)
     }
   }, [])
-  const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: convite.festa.fusoHorario, hour: '2-digit', minute: '2-digit' })
-    .format(new Date(convite.festa.dataHora))
-    .replace(':00', 'h')
   return (
-    <div ref={ref} className="py-4 text-center">
+    <div ref={ref} className="py-3 text-center">
       <motion.p
-        initial={{ scale: 0.6, opacity: 0 }}
-        whileInView={{ scale: [0.6, 1.15, 1], opacity: 1 }}
+        ref={title}
+        data-holo
+        initial={perf.reducedMotion ? false : { scale: 0.6, opacity: 0, rotate: -6 }}
+        whileInView={{ scale: 1, opacity: 1, rotate: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 1 }}
-        className="shimmer font-script text-[72px] leading-none"
+        transition={{ type: 'spring', stiffness: 180, damping: 12 }}
+        className="holo-text serif text-[76px] leading-none"
       >
         É hoje!
       </motion.p>
       <div className="mt-2 flex justify-center gap-2" aria-hidden="true">
-        <ButterflyIcon size={34} speed={0.3} />
-        <ButterflyIcon size={26} speed={0.25} className="-mt-3" />
-        <ButterflyIcon size={34} speed={0.35} />
+        <ButterflyIcon size={30} speed={0.3} />
+        <ButterflyIcon size={22} speed={0.25} className="-mt-3" />
+        <ButterflyIcon size={30} speed={0.35} />
       </div>
-      <p className="mt-3 text-[18px] text-white/90">
-        Te esperamos às <strong className="text-gold">{hora}</strong> 🦋
+      <p className="mt-3 text-[18px] font-semibold text-roxo">
+        {hora ? (
+          <>
+            Te esperamos às <span className="mono text-violeta-txt">{hora}</span> 🦋
+          </>
+        ) : (
+          <>Te esperamos! 🦋</>
+        )}
       </p>
     </div>
   )
@@ -99,10 +99,10 @@ function Today() {
 
 function Thanks() {
   return (
-    <div className="py-4 text-center">
-      <p className="font-script text-[54px] leading-tight text-white">Obrigado!</p>
-      <p className="mx-auto mt-2 max-w-[28ch] text-[17px] leading-relaxed text-lilas">
-        A festa foi mágica porque você fez parte dela. {convite.crianca.nome} agradece cada abraço e cada sorriso 💜
+    <div className="py-3 text-center">
+      <p className="serif text-[56px] leading-tight text-roxo">Obrigado!</p>
+      <p className="mx-auto mt-2 max-w-[28ch] text-[17px] leading-relaxed text-tinta-2">
+        A festa foi linda porque você fez parte dela. {convite.crianca.nome} agradece cada abraço e cada sorriso 💜
       </p>
     </div>
   )
@@ -120,13 +120,25 @@ export function Countdown() {
   const sec = Math.floor((diff / 1000) % 60)
 
   return (
-    <section ref={ref} id="contagem" aria-labelledby="t-contagem" className="wrap reveal pt-6 pb-14">
-      <SectionTitle id="t-contagem" kicker={phase === 'depois' ? 'Foi lindo' : 'Contagem regressiva'} title={phase === 'antes' ? 'Falta pouco!' : phase === 'hoje' ? 'Chegou o dia' : 'Que festa!'} />
-      <GlassCard blur className="px-4 py-6">
+    <section ref={ref} id="contagem" aria-labelledby="t-contagem" className="wrap pb-14">
+      <SectionTitle
+        id="t-contagem"
+        index={indice('contagem')}
+        kicker={phase === 'depois' ? 'Foi lindo' : 'Contagem regressiva'}
+        title={phase === 'antes' ? 'Falta pouco' : phase === 'hoje' ? 'Chegou o dia' : 'Que festa!'}
+      />
+      <Card blur className="reveal px-3.5 pb-5 pt-4">
         {phase === 'antes' && (
           <>
-            <div role="timer" className="flex gap-2.5">
-              <Unit value={d} label={d === 1 ? 'dia' : 'dias'} />
+            <div className="mb-3 flex items-center justify-between px-1">
+              <span className="label !text-[11px]">até a festa</span>
+              <span className="label flex items-center gap-1.5 !text-[11px]" aria-hidden="true">
+                <span key={sec} className="live-dot" />
+                ao vivo
+              </span>
+            </div>
+            <div role="timer" className="flex gap-2">
+              <Unit value={d} label={d === 1 ? 'dia' : 'dias'} digits={d >= 100 ? 3 : 2} />
               <Unit value={h} label="horas" />
               <Unit value={m} label="min" />
               <Unit value={sec} label="seg" />
@@ -134,11 +146,14 @@ export function Countdown() {
             <p className="sr-only-live">
               Faltam {d} dias, {h} horas e {m} minutos para a festa.
             </p>
+            {!convite.festa.horarioDefinido && (
+              <p className="mt-4 px-1 text-center text-[14px] font-medium text-tinta-2">Horário a confirmar 💜</p>
+            )}
           </>
         )}
         {phase === 'hoje' && <Today />}
         {phase === 'depois' && <Thanks />}
-      </GlassCard>
+      </Card>
     </section>
   )
 }

@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { convite } from '../../config/convite'
-import { useOpened } from '../../hooks/useStores'
+import { useMusicAvailable, useOpened } from '../../hooks/useStores'
 import { scroll } from '../../lib/scroll'
 import { MusicButton } from './MusicButton'
 import { PressButton } from './Press'
 import { ButterflyIcon } from './ButterflyIcon'
 
 /**
- * Barra fixa embaixo (alcance do polegar): atalho "Confirmar presença" + música.
- * O atalho some quando a seção de confirmação está na tela.
+ * Pill flutuante clara embaixo (alcance do polegar): "Confirmar presença" + música.
+ * O atalho some no hero e quando a seção de confirmação está na tela.
  */
 export function BottomBar() {
   const opened = useOpened()
+  const hasMusic = useMusicAvailable()
   const [showCta, setShowCta] = useState(false)
 
   useEffect(() => {
@@ -34,33 +35,35 @@ export function BottomBar() {
     return () => io.disconnect()
   }, [opened])
 
+  if (!hasMusic && !convite.secoes.rsvp) return null
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={opened ? { opacity: 1, y: 0 } : undefined}
-      transition={{ delay: 1.2, duration: 0.6 }}
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex items-end justify-between gap-3 px-[max(16px,env(safe-area-inset-left))] pb-[max(16px,env(safe-area-inset-bottom))]"
+      transition={{ delay: 1.2, type: 'spring', stiffness: 200, damping: 24 }}
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-end px-[max(16px,env(safe-area-inset-left))] pb-[max(16px,env(safe-area-inset-bottom))]"
     >
-      <div className="pointer-events-auto min-w-0">
-        <AnimatePresence>
+      <motion.div layout transition={{ type: 'spring', stiffness: 380, damping: 32 }} className={`dock pointer-events-auto transition-opacity ${!showCta && !hasMusic ? "pointer-events-none opacity-0" : ""}`}>
+        <AnimatePresence initial={false}>
           {showCta && (
             <motion.div
-              initial={{ opacity: 0, y: 24, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 24, scale: 0.9 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+              key="cta"
+              initial={{ opacity: 0, scale: 0.85, width: 0 }}
+              animate={{ opacity: 1, scale: 1, width: 'auto' }}
+              exit={{ opacity: 0, scale: 0.85, width: 0 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              className="overflow-hidden"
             >
-              <PressButton className="sheen-loop h-14 pl-4 pr-6" onClick={() => scroll.to('#confirmar')}>
-                <ButterflyIcon size={24} speed={0.35} />
+              <PressButton className="whitespace-nowrap" onClick={() => scroll.to('#confirmar')}>
+                <ButterflyIcon size={20} speed={0.35} light />
                 Confirmar presença
               </PressButton>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-      <div className="pointer-events-auto">
         <MusicButton />
-      </div>
+      </motion.div>
     </motion.div>
   )
 }

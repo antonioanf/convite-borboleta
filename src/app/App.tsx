@@ -9,6 +9,7 @@ import { Destaque } from '../components/sections/Destaque'
 import { Countdown } from '../components/sections/Countdown'
 import { Details } from '../components/sections/Details'
 import { Gallery } from '../components/sections/Gallery'
+import { Velinhas } from '../components/sections/Velinhas'
 import { Rsvp } from '../components/sections/Rsvp'
 import { Pix } from '../components/sections/Pix'
 import { Footer } from '../components/sections/Footer'
@@ -82,6 +83,7 @@ export function App() {
         {s.contagem && <Countdown />}
         {s.local && <Details />}
         {s.galeria && <Gallery />}
+        {s.velinhas && <Velinhas />}
         {s.rsvp && <Rsvp />}
         {s.pix && convite.pix && <Pix />}
         <Footer />

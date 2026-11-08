@@ -1,44 +1,44 @@
 import { useId, useRef, useState, type FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { convite } from '../../config/convite'
-import { GlassCard } from '../ui/GlassCard'
+import { Card } from '../ui/Card'
 import { SectionTitle } from '../ui/SectionTitle'
 import { PressButton, PressLink } from '../ui/Press'
 import { ButterflyIcon } from '../ui/ButterflyIcon'
+import { Icon } from '../ui/Icons'
 import { vibrate } from '../../lib/haptics'
-import { field } from '../../lib/butterflyField'
+import { celebrate } from '../../lib/celebrate'
 import { now } from '../../lib/debug'
-import { perf } from '../../lib/perf'
+import { indice } from '../../lib/secoes'
 
 const r = convite.rsvp
-const prazo = new Date(`${r.prazo || "2099-01-01"}T23:59:59-03:00`)
-const prazoTxt = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', timeZone: convite.festa.fusoHorario }).format(prazo)
+const prazo = r.prazo ? new Date(`${r.prazo}T23:59:59-03:00`) : null
+const prazoTxt = prazo
+  ? new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', timeZone: convite.festa.fusoHorario }).format(prazo)
+  : ''
 
 function waUrl(nome: string, pessoas: number, recado: string) {
-  const linhas = [
-    `Olá! 🦋 Confirmo presença no aniversário de ${convite.crianca.nome}!`,
-    '',
-    `Nome: ${nome}`,
-    `Pessoas: ${pessoas}`,
-  ]
+  const linhas = [`Olá! 🦋 Confirmo presença no aniversário de ${convite.crianca.nome}!`, '', `Nome: ${nome}`, `Pessoas: ${pessoas}`]
   if (recado.trim()) linhas.push(`Recado: ${recado.trim()}`)
   return `https://wa.me/${r.whatsapp}?text=${encodeURIComponent(linhas.join('\n'))}`
 }
 
-async function celebrate(origin: HTMLElement | null) {
-  const rect = origin?.getBoundingClientRect()
-  const x = rect ? rect.left + rect.width / 2 : innerWidth / 2
-  const y = rect ? rect.top + rect.height / 2 : innerHeight / 2
-  field.burst(x, y, perf.isLite() ? 4 : 8)
-  if (perf.reducedMotion) return
-  const { default: confetti } = await import('canvas-confetti')
-  const p = convite.paleta
-  const colors = [p.violeta, p.lilas, p.lilas, p.rosa, p.prata, '#ffffff']
-  const o = { x: x / innerWidth, y: y / innerHeight }
-  const base = { colors, disableForReducedMotion: true, zIndex: 95, scalar: 1.05 }
-  confetti({ ...base, particleCount: perf.isLite() ? 60 : 120, spread: 80, startVelocity: 48, origin: o })
-  setTimeout(() => confetti({ ...base, particleCount: 50, angle: 60, spread: 60, origin: { x: 0, y: 0.75 } }), 220)
-  setTimeout(() => confetti({ ...base, particleCount: 50, angle: 120, spread: 60, origin: { x: 1, y: 0.75 } }), 380)
+/** Check desenhado (traço animado). */
+function Check() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <motion.path
+        d="M5 12.5l4.5 4.5L19 7.5"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 }}
+      />
+    </svg>
+  )
 }
 
 export function Rsvp() {
@@ -48,16 +48,19 @@ export function Rsvp() {
   const [recado, setRecado] = useState('')
   const [erro, setErro] = useState<string | null>(null)
   const [shake, setShake] = useState(0)
-  const [enviado, setEnviado] = useState<string | null>(null)
+  const [stage, setStage] = useState<'form' | 'check' | 'ok'>('form')
+  const [url, setUrl] = useState<string | null>(null)
   const nomeRef = useRef<HTMLInputElement>(null)
   const submitRef = useRef<HTMLButtonElement>(null)
   const timer = useRef(0)
-  const passouPrazo = now() > prazo.getTime()
+  const passouPrazo = !!prazo && now() > prazo.getTime()
+  const semWhats = !r.whatsapp
 
   const setQtd = (n: number) => setPessoas(Math.max(1, Math.min(r.maxPessoas, n || 1)))
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
+    if (stage !== 'form') return
     const n = nome.trim().replace(/\s+/g, ' ')
     if (n.length < 2) {
       setErro(n.length === 0 ? 'Conta pra gente o seu nome 💜' : 'Seu nome parece curtinho demais — pode completar?')
@@ -68,40 +71,38 @@ export function Rsvp() {
     }
     setErro(null)
     vibrate([20, 40, 20, 40, 60])
-    const url = waUrl(n, pessoas, recado)
-    setEnviado(url)
-    celebrate(submitRef.current)
-    // abre o WhatsApp dos pais com a mensagem pronta
+    const link = semWhats ? null : waUrl(n, pessoas, recado)
+    setUrl(link)
+    // 1) o botão vira um check  2) a tela solta borboletas + confete  3) abre o WhatsApp
+    setStage('check')
+    celebrate(submitRef.current, 'grande')
     timer.current = window.setTimeout(() => {
-      window.location.href = url
-    }, 1600)
+      setStage('ok')
+      if (link) window.location.href = link
+    }, 1500)
   }
 
   return (
-    <section id="confirmar" aria-labelledby="t-rsvp" className="wrap reveal pb-14">
-      <SectionTitle id="t-rsvp" kicker="Confirmação de presença" title="Você vem?" />
-      <GlassCard blur className="p-6">
+    <section id="confirmar" aria-labelledby="t-rsvp" className="wrap pb-14">
+      <SectionTitle id="t-rsvp" index={indice('confirmar')} kicker="Confirmação de presença" title="Você vem?" />
+      <Card blur className="reveal p-5">
         <AnimatePresence mode="wait" initial={false}>
-          {!enviado ? (
-            <motion.form
-              key="form"
-              noValidate
-              onSubmit={submit}
-              exit={{ opacity: 0, scale: 0.96 }}
-              className="flex flex-col gap-5"
-            >
-              <p className="text-center text-[16px] text-white/85">
-                {passouPrazo ? (
+          {stage !== 'ok' ? (
+            <motion.form key="form" noValidate onSubmit={submit} exit={{ opacity: 0, scale: 0.97 }} className="flex flex-col gap-5">
+              <p className="text-[16px] font-medium leading-relaxed text-tinta-2">
+                {!prazo ? (
+                  <>Confirme sua presença para prepararmos tudo com carinho.</>
+                ) : passouPrazo ? (
                   <>O prazo era até {prazoTxt}, mas ainda dá para avisar a família 💜</>
                 ) : (
                   <>
-                    Confirme até <strong className="text-gold">{prazoTxt}</strong> para prepararmos tudo com carinho.
+                    Confirme até <strong className="font-bold text-violeta-txt">{prazoTxt}</strong> para prepararmos tudo com carinho.
                   </>
                 )}
               </p>
 
               <motion.div key={shake} animate={shake ? { x: [0, -10, 10, -6, 6, 0] } : undefined} transition={{ duration: 0.4 }}>
-                <label htmlFor={`${id}-nome`} className="mb-2 block text-[15px] font-medium text-lilas">
+                <label htmlFor={`${id}-nome`} className="label mb-2 block">
                   Seu nome
                 </label>
                 <input
@@ -122,7 +123,7 @@ export function Rsvp() {
                   aria-invalid={!!erro}
                   aria-describedby={erro ? `${id}-erro` : undefined}
                   placeholder="Ex.: Ana e família"
-                  className={`h-14 w-full rounded-2xl border bg-white/[.07] px-4 text-[17px] text-white placeholder:text-white/40 outline-none transition-colors focus:border-rosa focus:bg-white/10 ${erro ? 'border-rosa' : 'border-white/20'}`}
+                  className="field"
                 />
                 <AnimatePresence>
                   {erro && (
@@ -132,7 +133,7 @@ export function Rsvp() {
                       initial={{ opacity: 0, y: -6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="mt-2 text-[15px] text-rosa"
+                      className="mt-2 text-[15px] font-semibold text-magenta-txt"
                     >
                       {erro}
                     </motion.p>
@@ -141,10 +142,10 @@ export function Rsvp() {
               </motion.div>
 
               <div>
-                <label htmlFor={`${id}-qtd`} className="mb-2 block text-[15px] font-medium text-lilas">
-                  Quantas pessoas (contando você)?
+                <label htmlFor={`${id}-qtd`} className="label mb-2 block">
+                  Quantas pessoas (com você)
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <button
                     type="button"
                     onClick={() => {
@@ -153,7 +154,7 @@ export function Rsvp() {
                     }}
                     disabled={pessoas <= 1}
                     aria-label="Diminuir"
-                    className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white/10 text-[26px] text-white transition active:scale-90 disabled:opacity-40"
+                    className="step"
                   >
                     −
                   </button>
@@ -166,7 +167,7 @@ export function Rsvp() {
                     enterKeyHint="next"
                     value={pessoas}
                     onChange={(e) => setQtd(parseInt(e.target.value.replace(/\D/g, ''), 10))}
-                    className="h-14 w-full min-w-0 rounded-2xl border border-white/20 bg-white/[.07] text-center text-[22px] font-semibold tabular-nums text-white outline-none focus:border-rosa"
+                    className="field mono min-w-0 text-center !text-[22px] font-semibold"
                   />
                   <button
                     type="button"
@@ -176,7 +177,7 @@ export function Rsvp() {
                     }}
                     disabled={pessoas >= r.maxPessoas}
                     aria-label="Aumentar"
-                    className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white/10 text-[26px] text-white transition active:scale-90 disabled:opacity-40"
+                    className="step"
                   >
                     +
                   </button>
@@ -184,9 +185,9 @@ export function Rsvp() {
               </div>
 
               <div>
-                <label htmlFor={`${id}-recado`} className="mb-2 flex justify-between text-[15px] font-medium text-lilas">
-                  <span>Recado para a {convite.crianca.nome} (opcional)</span>
-                  <span className="tabular-nums text-white/50" aria-hidden="true">
+                <label htmlFor={`${id}-recado`} className="label mb-2 flex justify-between gap-2">
+                  <span>Recado para a {convite.crianca.nome.split(' ')[0]} (opcional)</span>
+                  <span className="mono" aria-hidden="true">
                     {recado.length}/280
                   </span>
                 </label>
@@ -200,42 +201,76 @@ export function Rsvp() {
                   value={recado}
                   onChange={(e) => setRecado(e.target.value)}
                   placeholder="Escreva um carinho ✨"
-                  className="w-full resize-none rounded-2xl border border-white/20 bg-white/[.07] px-4 py-3 text-[17px] text-white placeholder:text-white/40 outline-none focus:border-rosa focus:bg-white/10"
+                  className="field resize-none !py-3.5 leading-relaxed"
                 />
               </div>
 
-              <PressButton ref={submitRef} type="submit" className="sheen-loop mt-1 h-16 w-full text-[18px]">
-                <ButterflyIcon size={26} speed={0.3} />
-                Confirmar presença
+              <PressButton ref={submitRef} type="submit" className="sheen-loop mt-1 h-[60px] w-full text-[17px]" aria-live="polite">
+                <AnimatePresence mode="wait" initial={false}>
+                  {stage === 'check' ? (
+                    <motion.span
+                      key="check"
+                      initial={{ scale: 0.4, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 16 }}
+                      className="inline-flex items-center gap-2"
+                    >
+                      <Check />
+                      Confirmado!
+                    </motion.span>
+                  ) : (
+                    <motion.span key="txt" exit={{ scale: 0.6, opacity: 0 }} className="inline-flex items-center gap-2.5">
+                      <ButterflyIcon size={24} speed={0.3} light />
+                      Confirmar presença
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </PressButton>
-              <p className="-mt-2 text-center text-[14px] text-white/60">Vamos abrir o WhatsApp com a mensagem pronta.</p>
+              <p className="-mt-2 text-center text-[14px] font-medium text-tinta-2">
+                {semWhats ? 'Confirmação pelo WhatsApp em breve.' : 'Vamos abrir o WhatsApp com a mensagem pronta.'}
+              </p>
             </motion.form>
           ) : (
             <motion.div
               key="ok"
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-              className="flex flex-col items-center gap-4 py-4 text-center"
+              className="flex flex-col items-center gap-3 py-3 text-center"
               role="status"
             >
-              <ButterflyIcon size={72} speed={0.25} />
-              <p className="shimmer font-script text-[56px] leading-none">Oba!</p>
-              <p className="text-[18px] text-white">Presença confirmada 💜</p>
-              <p className="text-[16px] text-white/75">Abrindo o WhatsApp com a sua mensagem…</p>
-              <PressLink href={enviado} variant="gold" className="mt-2 w-full">
-                Abrir WhatsApp
-              </PressLink>
-              <button type="button" onClick={() => {
+              <span className="grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-btn-a to-btn-b text-white shadow-lg">
+                <Check />
+              </span>
+              <p className="serif text-[52px] leading-none text-roxo">Oba!</p>
+              <p className="text-[18px] font-bold text-roxo">Presença confirmada 💜</p>
+              {url ? (
+                <>
+                  <p className="text-[15px] font-medium text-tinta-2">Abrindo o WhatsApp com a sua mensagem…</p>
+                  <PressLink href={url} className="mt-2 w-full">
+                    <Icon name="whatsapp" size={20} />
+                    Abrir WhatsApp
+                  </PressLink>
+                </>
+              ) : (
+                <p className="text-[15px] font-medium text-tinta-2">
+                  O WhatsApp para confirmação ainda não foi configurado. Avise a família da {convite.crianca.nome.split(' ')[0]} por mensagem 💜
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => {
                   clearTimeout(timer.current)
-                  setEnviado(null)
-                }} className="min-h-12 px-4 text-[15px] text-lilas underline underline-offset-4">
+                  setStage('form')
+                }}
+                className="min-h-12 px-4 text-[15px] font-semibold text-violeta-txt underline underline-offset-4"
+              >
                 Editar confirmação
               </button>
             </motion.div>
           )}
         </AnimatePresence>
-      </GlassCard>
+      </Card>
     </section>
   )
 }

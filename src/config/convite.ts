@@ -139,7 +139,7 @@ const bolo: Foto = {
   alt: 'Anna Liz de tiara olhando sorridente para o seu bolo cor-de-rosa com uma borboleta escrita Anna Liz',
   largura: 888,
   altura: 1600,
-  foco: '50% 78%',
+  foco: '50% 97%',
 }
 const balao3: Foto = {
   src: '/fotos/anna-balao3.webp',
